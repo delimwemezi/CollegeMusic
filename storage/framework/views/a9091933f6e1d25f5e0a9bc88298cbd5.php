@@ -1,0 +1,2 @@
+<?php echo $__env->make('auth.shared_auth', ['initialState' => 'login'], array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
+<?php /**PATH C:\wamp64\www\College-Music\resources\views/auth/login.blade.php ENDPATH**/ ?>
