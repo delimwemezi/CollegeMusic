@@ -25,3 +25,7 @@ _ide_helper.php
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Laravel cache and local database
+/bootstrap/cache/*.php
+/database/database.sqlite
