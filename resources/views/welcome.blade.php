@@ -844,7 +844,85 @@
             .nav-links {
                 display: none; /* simple mobile hide */
             }
+            .navbar {
+                height: 70px;
+            }
+            .navbar-content {
+                padding: 0 1rem;
+            }
+            .logo {
+                font-size: 1.25rem;
+            }
+            .nav-actions {
+                gap: 0.55rem !important;
+            }
+            .theme-toggle-btn {
+                width: 52px;
+                height: 30px;
+            }
+            .theme-toggle-circle {
+                width: 24px;
+                height: 24px;
+            }
+            .light-theme .theme-toggle-circle {
+                transform: translateX(24px);
+            }
+            .lang-switch-wrapper {
+                width: 74px;
+                height: 30px;
+            }
+            .lang-switch-btn {
+                font-size: 0.65rem;
+                line-height: 24px;
+                height: 24px;
+            }
+            .lang-switch-slider {
+                width: 33px;
+                height: 24px;
+            }
+            html[lang="sw"] .lang-switch-slider {
+                transform: translateX(35px);
+            }
+            .nav-actions .nav-link {
+                font-size: 0.85rem;
+            }
+            .nav-actions .btn {
+                padding: 0.45rem 1rem !important;
+                font-size: 0.78rem !important;
+            }
         }
+
+        @media (max-width: 576px) {
+            .logo-text {
+                display: none; /* hide brand text on tiny screens to avoid overflow */
+            }
+            .logo {
+                font-size: 1.4rem;
+            }
+            .nav-actions {
+                gap: 0.4rem !important;
+            }
+            .nav-actions .nav-link {
+                font-size: 0.8rem;
+            }
+            .nav-actions .btn {
+                padding: 0.4rem 0.8rem !important;
+                font-size: 0.75rem !important;
+            }
+            .stats-bar {
+                flex-direction: column;
+                gap: 1.5rem;
+                padding: 1.5rem;
+            }
+            .stats-bar > div[style*="border-left"] {
+                display: none !important;
+            }
+            .stats-bar > div:not(:last-child):not([style*="border-left"]) {
+                border-bottom: 1px solid var(--border-color);
+                padding-bottom: 1.25rem;
+            }
+        }
+
 
         /* Animated Floating Headphones Background */
         .bg-headphones-container {
@@ -1108,7 +1186,7 @@
     <nav class="navbar">
         <div class="container navbar-content">
             <a href="{{ route('home') }}" class="logo">
-                <i class="fa-solid fa-music"></i> CollegeMusic
+                <i class="fa-solid fa-music"></i> <span class="logo-text">CollegeMusic</span>
             </a>
             <ul class="nav-links">
                 <li><a href="#features" class="nav-link">{{ __('messages.features') }}</a></li>

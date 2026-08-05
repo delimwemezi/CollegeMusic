@@ -1037,6 +1037,23 @@ a:hover {
     overflow-y: auto;
 }
 
+.auth-split-form-container {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 50%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 4rem 3rem;
+    z-index: 5;
+    background-color: #080c14;
+    overflow-y: auto;
+}
+
+
 .register-panel {
     left: 0;
     opacity: 0;
@@ -1203,11 +1220,29 @@ a:hover {
         visibility: visible !important;
         display: none;
     }
+    .auth-split-form-container {
+        position: relative;
+        width: 100%;
+        min-height: 100vh;
+        height: auto;
+        padding: 4rem 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
     .auth-split-wrapper.active-login .login-panel {
         display: flex;
     }
     .auth-split-wrapper.active-register .register-panel {
         display: flex;
+    }
+    @keyframes authFadeIn {
+        from { opacity: 0; transform: translateY(10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    .auth-split-wrapper.active-login .login-panel,
+    .auth-split-wrapper.active-register .register-panel {
+        animation: authFadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
     }
 }
 
