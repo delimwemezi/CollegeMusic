@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -232,6 +233,17 @@ class AuthController extends Controller
         $code = rand(100000, 999999);
         $user->verification_code = $code;
         $user->save();
+
+        // Send password reset email
+        try {
+            Mail::raw("Your password reset code is: {$code}", function ($message) use ($user) {
+                $message->to($user->email)
+                    ->subject('Password Reset Code - CollegeMusic');
+            });
+            Log::info("Password reset email sent to {$user->email}");
+        } catch (\Exception $e) {
+            Log::error("Failed to send password reset email: " . $e->getMessage());
+        }
 
         Log::info("Recovery code for User ID {$user->id}: {$code}");
         session(['reset_email' => $user->email, 'debug_reset_code' => $code]);
