@@ -24,16 +24,31 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Admins
-        $admin = User::create([
-            'name' => 'System Administrator',
-            'email' => 'admin@collegemusic.com',
-            'phone' => '+1112223333',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-            'status' => 'active',
-            'email_verified_at' => now(),
-            'phone_verified_at' => now(),
-        ]);
+        $admin = User::updateOrCreate(
+            ['email' => 'delfinusideusdedith@gmail.com'],
+            [
+                'name' => 'Delfinusi Deusdedith',
+                'phone' => '+255700000000',
+                'password' => Hash::make('deli@123!'),
+                'role' => 'admin',
+                'status' => 'active',
+                'email_verified_at' => now(),
+                'phone_verified_at' => now(),
+            ]
+        );
+
+        $systemAdmin = User::updateOrCreate(
+            ['email' => 'admin@collegemusic.com'],
+            [
+                'name' => 'System Administrator',
+                'phone' => '+1112223333',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+                'status' => 'active',
+                'email_verified_at' => now(),
+                'phone_verified_at' => now(),
+            ]
+        );
 
         AuditLog::create([
             'user_id' => $admin->id,
