@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rules\Password;
+use Twilio\Rest\Client;
 
 class AuthController extends Controller
 {
@@ -236,15 +237,39 @@ class AuthController extends Controller
         Log::info("Recovery code for User ID {$user->id}: {$code}");
         session(['reset_email' => $user->email, 'debug_reset_code' => $code]);
 
+        // Send password reset code via WhatsApp using Twilio
+        try {
+            $accountSid = env('TWILIO_ACCOUNT_SID');
+            $authToken = env('TWILIO_AUTH_TOKEN');
+            $twilioNumber = env('TWILIO_WHATSAPP_NUMBER', 'whatsapp:+14155552671');
+            $receiveNumber = env('TWILIO_RECEIVE_NUMBER', 'whatsapp:+255621413690');
+
+            if ($accountSid && $authToken) {
+                $twilio = new Client($accountSid, $authToken);
+                $message = $twilio->messages->create(
+                    $receiveNumber,
+                    [
+                        'from' => $twilioNumber,
+                        'body' => "Your CollegeMusic password reset code is: {$code}"
+                    ]
+                );
+                Log::info("Password reset code sent via WhatsApp to {$receiveNumber}. Message SID: {$message->sid}");
+            } else {
+                Log::warning("Twilio credentials not configured. Recovery code: {$code}");
+            }
+        } catch (\Exception $e) {
+            Log::error("Failed to send WhatsApp message: " . $e->getMessage());
+        }
+
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'request_password_reset',
-            'description' => 'Requested password recovery code.',
+            'description' => 'Requested password recovery code via WhatsApp.',
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent()
         ]);
 
-        return redirect()->route('reset.show')->with('success', 'A password recovery code has been sent!');
+        return redirect()->route('reset.show')->with('success', 'A password recovery code has been sent to your WhatsApp!');
     }
 
     public function showReset()
