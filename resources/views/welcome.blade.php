@@ -1251,68 +1251,105 @@
             box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
         }
 
+        /* Contextual View Header Banner when isolated */
+        .view-context-banner {
+            display: none;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(17, 24, 39, 0.6));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 2rem;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: viewFadeIn 0.35s ease forwards;
+        }
+
+        .light-theme .view-context-banner {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(248, 250, 252, 0.9));
+            border-color: rgba(99, 102, 241, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        body:not([data-view="all"]) .view-context-banner {
+            display: flex;
+        }
+
+        .view-context-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.35rem;
+            text-align: left;
+        }
+
+        .view-context-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            font-size: 0.8rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--primary);
+        }
+
+        .view-context-title {
+            font-family: var(--font-heading);
+            font-size: 1.35rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin: 0;
+        }
+
+        .btn-sm {
+            padding: 0.45rem 1.1rem !important;
+            font-size: 0.82rem !important;
+        }
+
+        /* VIEW ISOLATION LOGIC: Universal across Desktop and Mobile */
+        body[data-view="features"] .landing-section:not([data-section="features"]),
+        body[data-view="features"] .hero,
+        body[data-view="features"] .platforms-section,
+        body[data-view="features"] .pricing,
+        body[data-view="features"] .testimonials,
+        body[data-view="features"] .cta-section {
+            display: none !important;
+        }
+
+        body[data-view="platforms"] .landing-section:not([data-section="platforms"]),
+        body[data-view="platforms"] .hero,
+        body[data-view="platforms"] .features,
+        body[data-view="platforms"] .steps-section,
+        body[data-view="platforms"] .pricing,
+        body[data-view="platforms"] .testimonials,
+        body[data-view="platforms"] .cta-section {
+            display: none !important;
+        }
+
+        body[data-view="pricing"] .landing-section:not([data-section="pricing"]),
+        body[data-view="pricing"] .hero,
+        body[data-view="pricing"] .platforms-section,
+        body[data-view="pricing"] .features,
+        body[data-view="pricing"] .steps-section,
+        body[data-view="pricing"] .testimonials,
+        body[data-view="pricing"] .cta-section {
+            display: none !important;
+        }
+
+        /* Active Isolated Section Spacing */
+        body:not([data-view="all"]) .features,
+        body:not([data-view="all"]) .platforms-section,
+        body:not([data-view="all"]) .pricing {
+            padding-top: 130px;
+            min-height: 80vh;
+            animation: viewFadeIn 0.35s ease forwards;
+        }
+
         @media (max-width: 968px) {
             .mobile-view-tabs-container {
                 display: block;
-            }
-
-            /* Contextual View Header Banner when isolated on mobile */
-            .view-context-banner {
-                display: none;
-                margin-bottom: 3rem;
-                background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(17, 24, 39, 0.6));
-                border: 1px solid rgba(99, 102, 241, 0.3);
-                border-radius: var(--radius-lg);
-                padding: 1.25rem 2rem;
-                align-items: center;
-                justify-content: space-between;
-                flex-wrap: wrap;
-                gap: 1rem;
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-                animation: viewFadeIn 0.35s ease forwards;
-            }
-
-            body:not([data-view="all"]) .view-context-banner {
-                display: flex;
-            }
-
-            /* VIEW ISOLATION LOGIC: Strictly mobile-only */
-            body[data-view="features"] .landing-section:not([data-section="features"]),
-            body[data-view="features"] .hero,
-            body[data-view="features"] .platforms-section,
-            body[data-view="features"] .pricing,
-            body[data-view="features"] .testimonials,
-            body[data-view="features"] .cta-section {
-                display: none !important;
-            }
-
-            body[data-view="platforms"] .landing-section:not([data-section="platforms"]),
-            body[data-view="platforms"] .hero,
-            body[data-view="platforms"] .features,
-            body[data-view="platforms"] .steps-section,
-            body[data-view="platforms"] .pricing,
-            body[data-view="platforms"] .testimonials,
-            body[data-view="platforms"] .cta-section {
-                display: none !important;
-            }
-
-            body[data-view="pricing"] .landing-section:not([data-section="pricing"]),
-            body[data-view="pricing"] .hero,
-            body[data-view="pricing"] .platforms-section,
-            body[data-view="pricing"] .features,
-            body[data-view="pricing"] .steps-section,
-            body[data-view="pricing"] .testimonials,
-            body[data-view="pricing"] .cta-section {
-                display: none !important;
-            }
-
-            /* Active Isolated Section Spacing */
-            body:not([data-view="all"]) .features,
-            body:not([data-view="all"]) .platforms-section,
-            body:not([data-view="all"]) .pricing {
-                padding-top: 140px;
-                min-height: 85vh;
-                animation: viewFadeIn 0.35s ease forwards;
             }
         }
 
@@ -1399,27 +1436,27 @@
     <!-- Sticky Navigation -->
     <nav class="navbar">
         <div class="container navbar-content">
-            <a href="#top" class="logo" title="CollegeMusic Home">
+            <a href="javascript:void(0)" onclick="switchViewMode('all')" class="logo" title="CollegeMusic Home">
                 <i class="fa-solid fa-music"></i> <span class="logo-text">CollegeMusic</span>
             </a>
             <ul class="nav-links">
                 <li>
-                    <a href="#top" class="nav-link active" data-nav-target="top">
+                    <a href="javascript:void(0)" onclick="switchViewMode('all')" class="nav-link nav-view-btn active" data-view-target="all" data-nav-target="top">
                         Home
                     </a>
                 </li>
                 <li>
-                    <a href="#features" class="nav-link" data-nav-target="features">
+                    <a href="javascript:void(0)" onclick="switchViewMode('features')" class="nav-link nav-view-btn" data-view-target="features" data-nav-target="features">
                         {{ __('messages.features') }}
                     </a>
                 </li>
                 <li>
-                    <a href="#platforms" class="nav-link" data-nav-target="platforms">
+                    <a href="javascript:void(0)" onclick="switchViewMode('platforms')" class="nav-link nav-view-btn" data-view-target="platforms" data-nav-target="platforms">
                         {{ __('messages.platforms') }}
                     </a>
                 </li>
                 <li>
-                    <a href="#pricing" class="nav-link" data-nav-target="pricing">
+                    <a href="javascript:void(0)" onclick="switchViewMode('pricing')" class="nav-link nav-view-btn" data-view-target="pricing" data-nav-target="pricing">
                         {{ __('messages.pricing') }}
                     </a>
                 </li>
@@ -2042,7 +2079,7 @@
             }
         }
 
-        // Desktop ScrollSpy for Navbar links
+        // Desktop ScrollSpy for Navbar links (only active in "all" view mode)
         function initScrollSpy() {
             const sections = [
                 { id: 'top', el: document.querySelector('.hero') || document.getElementById('top') },
@@ -2051,10 +2088,15 @@
                 { id: 'pricing', el: document.getElementById('pricing') }
             ];
 
-            const navLinks = document.querySelectorAll('.nav-links .nav-link[data-nav-target]');
+            const navLinks = document.querySelectorAll('.nav-links .nav-view-btn');
             if (!navLinks.length) return;
 
             function updateActiveNav() {
+                // When in an isolated view (features, platforms, or pricing), do not let scroll change active tab
+                if (document.body.getAttribute('data-view') !== 'all') {
+                    return;
+                }
+
                 const scrollPos = window.scrollY + 140;
                 let currentId = 'top';
 
@@ -2065,7 +2107,10 @@
                 });
 
                 navLinks.forEach(link => {
-                    if (link.getAttribute('data-nav-target') === currentId) {
+                    const viewTarget = link.getAttribute('data-view-target');
+                    const isHome = (currentId === 'top' && viewTarget === 'all');
+                    const isMatch = (viewTarget === currentId);
+                    if (isHome || isMatch) {
                         link.classList.add('active');
                     } else {
                         link.classList.remove('active');
@@ -2078,15 +2123,11 @@
         }
 
         window.addEventListener('hashchange', () => {
-            if (window.innerWidth <= 968) {
-                initViewModeFromHash();
-            }
+            initViewModeFromHash();
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            if (window.innerWidth <= 968) {
-                initViewModeFromHash();
-            }
+            initViewModeFromHash();
             initScrollSpy();
         });
 
