@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\AuditLog;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,7 +16,21 @@ class ProfileController extends Controller
     public function edit()
     {
         $user = Auth::user();
-        return view('profile.edit', compact('user'));
+        $subscription = $user->subscription;
+        
+        $platformAccount = SystemSetting::get('platform_payout_account', [
+            'payout_method' => 'bank_transfer',
+            'bank_name' => 'JPMorgan Chase Bank, N.A.',
+            'account_number' => '987654321098',
+            'account_name' => 'CollegeMusic Global Distribution LLC',
+            'routing_swift' => 'CHASUS33XXX',
+            'mobile_network' => 'Safaricom M-Pesa Buy Goods / Paybill (Till #876543)',
+            'paypal_email' => 'finance@collegemusic.io',
+            'currency' => 'USD',
+            'notes' => 'Official platform treasury settlement account for receiving catalog revenues, subscription fees, and account upgrades.',
+        ]);
+
+        return view('profile.edit', compact('user', 'subscription', 'platformAccount'));
     }
 
     public function update(Request $request)

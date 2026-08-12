@@ -10,6 +10,7 @@ use App\Models\AuditLog;
 use App\Models\Royalty;
 use App\Models\Track;
 use App\Models\Artist;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -56,7 +57,20 @@ class PaymentController extends Controller
         // Artist/Label configured payout receiving account
         $payoutAccount = $user->payout_account;
 
-        return view('finance.index', compact('totalEarned', 'availableBalance', 'withdrawals', 'payments', 'subscription', 'payoutAccount'));
+        // Platform settlement account set by administrator
+        $platformAccount = SystemSetting::get('platform_payout_account', [
+            'payout_method' => 'bank_transfer',
+            'bank_name' => 'JPMorgan Chase Bank, N.A.',
+            'account_number' => '987654321098',
+            'account_name' => 'CollegeMusic Global Distribution LLC',
+            'routing_swift' => 'CHASUS33XXX',
+            'mobile_network' => 'Safaricom M-Pesa Buy Goods / Paybill (Till #876543)',
+            'paypal_email' => 'finance@collegemusic.io',
+            'currency' => 'USD',
+            'notes' => 'Official platform treasury settlement account for receiving catalog revenues, subscription fees, and account upgrades.',
+        ]);
+
+        return view('finance.index', compact('totalEarned', 'availableBalance', 'withdrawals', 'payments', 'subscription', 'payoutAccount', 'platformAccount'));
     }
 
     public function updatePayoutAccount(Request $request)
@@ -150,64 +164,115 @@ class PaymentController extends Controller
         return back()->with('success', 'Withdrawal request submitted successfully! Funds will be transferred once approved by administrators.');
     }
 
-    public function subscribePremium(Request $request)
+    public function processUpgrade(Request $request)
     {
         $user = Auth::user();
 
         $request->validate([
-            'card_name' => 'required|string',
-            'card_number' => 'required|string|min:16',
-            'card_expiry' => 'required|string',
-            'card_cvc' => 'required|string|min:3',
+            'plan_name' => 'required|string|in:Artist Premium,Record Label Pro,VIP Lifetime,Premium',
+            'payment_method' => 'required|string|in:card,mobile_money,bank_transfer,paypal',
+            'card_name' => 'required_if:payment_method,card|nullable|string|max:255',
+            'card_number' => 'required_if:payment_method,card|nullable|string|min:15|max:19',
+            'card_expiry' => 'required_if:payment_method,card|nullable|string|max:7',
+            'card_cvc' => 'required_if:payment_method,card|nullable|string|min:3|max:4',
+            'transaction_reference' => 'required_unless:payment_method,card|nullable|string|max:100',
+            'payer_phone' => 'nullable|string|max:50',
+            'proof_notes' => 'nullable|string|max:500',
+        ]);
+
+        $plans = [
+            'Premium' => ['price' => 49.99, 'duration' => 365, 'role' => 'artist', 'label' => 'Artist Premium Distribution Plan'],
+            'Artist Premium' => ['price' => 49.99, 'duration' => 365, 'role' => 'artist', 'label' => 'Artist Premium Distribution Plan'],
+            'Record Label Pro' => ['price' => 149.99, 'duration' => 365, 'role' => 'record_label', 'label' => 'Record Label Pro Distribution Plan'],
+            'VIP Lifetime' => ['price' => 299.99, 'duration' => 3650, 'role' => $user->role, 'label' => 'VIP Lifetime Distribution Plan'],
+        ];
+
+        $planKey = $request->plan_name === 'Premium' ? 'Artist Premium' : $request->plan_name;
+        $selectedPlan = $plans[$request->plan_name] ?? $plans['Artist Premium'];
+        $price = $selectedPlan['price'];
+
+        // Retrieve active platform settlement account configured by admin
+        $platformAccount = SystemSetting::get('platform_payout_account', [
+            'payout_method' => 'bank_transfer',
+            'bank_name' => 'JPMorgan Chase Bank, N.A.',
+            'account_number' => '987654321098',
+            'account_name' => 'CollegeMusic Global Distribution LLC',
+            'currency' => 'USD',
         ]);
 
         DB::beginTransaction();
         try {
-            // Subscribe for 1 year
             $startsAt = now();
-            $endsAt = now()->addYear();
+            $endsAt = now()->addDays($selectedPlan['duration']);
 
             $sub = Subscription::updateOrCreate(
                 ['user_id' => $user->id],
                 [
-                    'plan_name' => 'Premium',
-                    'price' => 49.99,
+                    'plan_name' => $planKey,
+                    'price' => $price,
                     'status' => 'active',
                     'starts_at' => $startsAt,
                     'ends_at' => $endsAt,
                 ]
             );
 
-            // Record Payment
-            $ref = 'TX-' . Str::upper(Str::random(12));
+            // If user upgraded to Record Label Pro and current role is artist, promote role
+            if ($planKey === 'Record Label Pro' && $user->role === 'artist') {
+                $user->role = 'record_label';
+                $user->save();
+            }
+
+            // Generate transaction reference and invoice
+            $ref = $request->transaction_reference ?: ('TX-' . Str::upper(Str::random(12)));
             $inv = 'INV-' . date('Ymd') . '-' . sprintf('%04d', rand(1, 9999));
 
             Payment::create([
                 'user_id' => $user->id,
                 'subscription_id' => $sub->id,
-                'amount' => 49.99,
+                'amount' => $price,
                 'status' => 'completed',
-                'payment_method' => 'card',
+                'payment_method' => $request->payment_method,
                 'transaction_reference' => $ref,
                 'invoice_number' => $inv,
             ]);
 
+            $platformAccStr = ($platformAccount['bank_name'] ?? 'Platform Treasury') . ' Acc #' . ($platformAccount['account_number'] ?? 'N/A') . ' (' . ($platformAccount['account_name'] ?? 'CollegeMusic') . ')';
+
             AuditLog::create([
                 'user_id' => $user->id,
-                'action' => 'subscribe_premium',
-                'description' => 'Subscribed to Premium plan ($49.99/year). Ref: ' . $ref,
+                'action' => 'account_upgrade',
+                'description' => "Upgraded account to '{$planKey}' ($" . number_format($price, 2) . ") via {$request->payment_method}. Received into platform receiving account: {$platformAccStr}. Ref: {$ref}.",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
 
+            // Broadcast revenue notification to all administrators
+            $allAdmins = User::where('role', 'admin')->get();
+            $adminAlert = "REVENUE RECEIVED: User {$user->name} ({$user->email}, Role: {$user->role}) paid $" . number_format($price, 2) . " for '{$planKey}' via {$request->payment_method}. Payment deposited into platform account: {$platformAccStr}. Ref: {$ref}.";
+
+            foreach ($allAdmins as $admin) {
+                AuditLog::create([
+                    'user_id' => $admin->id,
+                    'action' => 'admin_revenue_received',
+                    'description' => $adminAlert,
+                    'ip_address' => $request->ip(),
+                    'user_agent' => $request->userAgent()
+                ]);
+            }
+
             DB::commit();
 
-            return back()->with('success', 'Congratulations! You are now subscribed to the Premium Distribution Plan.');
+            return back()->with('success', "Congratulations! Your account has been upgraded to {$planKey} successfully. Payment settled into the platform distribution system (Invoice #{$inv}).");
 
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Subscription failed: ' . $e->getMessage());
+            return back()->with('error', 'Upgrade processing failed: ' . $e->getMessage());
         }
+    }
+
+    public function subscribePremium(Request $request)
+    {
+        return $this->processUpgrade($request);
     }
 
     public function viewInvoice(Payment $payment)

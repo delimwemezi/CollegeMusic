@@ -259,62 +259,128 @@
 </div>
 
 <div class="grid-cols-1" style="margin-top: 1.5rem;">
-    <!-- Subscription Management Form -->
+    <!-- Subscription & Upgrade Management Form -->
     <div>
         <div class="card">
-            <div class="card-header">
-                <h3 class="card-title"><i class="fa-solid fa-circle-check"></i> Subscription Management</h3>
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <h3 class="card-title"><i class="fa-solid fa-crown"></i> Subscription & Distribution Account Upgrades</h3>
+                @if($subscription && $subscription->status === 'active' && $subscription->ends_at->isAfter(now()))
+                    <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> {{ $subscription->plan_name }} (Expires: {{ $subscription->ends_at->format('M d, Y') }})</span>
+                @else
+                    <span class="badge badge-pending"><i class="fa-solid fa-tag"></i> Standard Free Plan</span>
+                @endif
             </div>
             <div class="card-body">
-                @if($subscription && $subscription->plan_name === 'Premium' && $subscription->status === 'active' && $subscription->ends_at->isAfter(now()))
+                @if($subscription && $subscription->status === 'active' && $subscription->ends_at->isAfter(now()))
                     <div style="text-align: center; color: var(--success); padding: 1.5rem 0;">
                         <i class="fa-solid fa-circle-check" style="font-size: 3.5rem; margin-bottom: 0.75rem;"></i>
-                        <h4>Active Premium Subscription</h4>
+                        <h4>Active {{ $subscription->plan_name }} Subscription</h4>
                         <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
-                            You have unlimited free music distributions to Spotify, Apple, and all DSPs.
+                            You have unlimited music distributions to Spotify, Apple Music, TikTok, and all DSPs.
                         </p>
                         <div style="margin-top: 1rem; font-size: 0.85rem; color: var(--text-muted);">
-                            Expires: <strong>{{ $subscription->ends_at->format('M d, Y') }}</strong>
+                            Active Period Ends: <strong>{{ $subscription->ends_at->format('M d, Y') }}</strong>
                         </div>
                     </div>
                 @else
-                    <div style="margin-bottom: 1.5rem; padding: 1rem; border-radius: var(--radius-md); background-color: rgba(99, 102, 241, 0.05); border: 1px solid rgba(99, 102, 241, 0.15);">
-                        <h4 style="color: var(--accent); margin-bottom: 0.25rem;"><i class="fa-solid fa-crown"></i> Upgrade to Premium Plan</h4>
-                        <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.4; margin-top: 0.25rem;">
-                            For just <strong>$49.99/year</strong>, unlock unlimited catalog uploads, bypass release distribution fees, and get detailed location stats.
-                        </p>
-                    </div>
-
                     <form action="{{ route('finance.subscribe') }}" method="POST">
                         @csrf
-                        <div class="form-group">
-                            <label class="form-label">Plan Selection</label>
-                            <input type="text" class="form-input" value="Premium Plan - $49.99/year" disabled style="background-color: var(--bg-card);">
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="card_name">Name on Card</label>
-                            <input type="text" id="card_name" name="card_name" class="form-input" placeholder="e.g. John Doe" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="card_number">Card Number</label>
-                            <input type="text" id="card_number" name="card_number" class="form-input" placeholder="xxxx xxxx xxxx xxxx" maxlength="16" required>
-                        </div>
-
-                        <div class="grid-cols-2" style="margin-bottom: 1.5rem;">
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label" for="card_expiry">Expiry Date</label>
-                                <input type="text" id="card_expiry" name="card_expiry" class="form-input" placeholder="MM/YY" maxlength="5" required>
+                        <div class="grid-cols-2">
+                            <div class="form-group">
+                                <label class="form-label" for="finance_plan_name">Select Upgrade Plan</label>
+                                <select id="finance_plan_name" name="plan_name" class="form-select" onchange="adjustFinancePlan(this.value)" required>
+                                    <option value="Artist Premium">Artist Premium Plan - $49.99/year</option>
+                                    <option value="Record Label Pro">Record Label Pro Plan - $149.99/year</option>
+                                    <option value="VIP Lifetime">VIP Lifetime Unlimited - $299.99 one-time</option>
+                                </select>
                             </div>
-                            <div class="form-group" style="margin-bottom: 0;">
-                                <label class="form-label" for="card_cvc">CVC</label>
-                                <input type="text" id="card_cvc" name="card_cvc" class="form-input" placeholder="123" maxlength="3" required>
+
+                            <div class="form-group">
+                                <label class="form-label" for="finance_payment_method">Payment Method to Distribution System</label>
+                                <select id="finance_payment_method" name="payment_method" class="form-select" onchange="adjustFinancePaymentMethod(this.value)" required>
+                                    <option value="card">Credit / Debit Card (Instant Processing)</option>
+                                    <option value="bank_transfer">Direct Bank Transfer (Platform Settlement Account)</option>
+                                    <option value="mobile_money">Mobile Money (M-Pesa / Airtel / MTN)</option>
+                                    <option value="paypal">PayPal Treasury Email</option>
+                                </select>
                             </div>
                         </div>
 
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fa-solid fa-credit-card"></i> Pay $49.99 & Subscribe
+                        <!-- Platform Settlement Info Box -->
+                        <div id="financeSettlementBox" style="display: none; background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+                            <div style="color: var(--primary); font-weight: 700; font-size: 0.9rem; margin-bottom: 0.5rem;">
+                                <i class="fa-solid fa-vault"></i> Platform Treasury Receiving Account:
+                            </div>
+                            <div class="grid-cols-2" style="gap: 0.75rem; font-size: 0.85rem; background: var(--bg-card); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
+                                <div id="finSettlementBank">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Bank:</span>
+                                    <strong>{{ $platformAccount['bank_name'] ?? 'JPMorgan Chase Bank, N.A.' }}</strong>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Account / Till:</span>
+                                    <strong style="color: var(--success); font-family: monospace;">{{ $platformAccount['account_number'] ?? '987654321098' }}</strong>
+                                </div>
+                                <div>
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Beneficiary:</span>
+                                    <span>{{ $platformAccount['account_name'] ?? 'CollegeMusic Global Distribution LLC' }}</span>
+                                </div>
+                                <div id="finSettlementRouting">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">SWIFT / Routing:</span>
+                                    <span style="font-family: monospace;">{{ $platformAccount['routing_swift'] ?? 'CHASUS33XXX' }}</span>
+                                </div>
+                                <div id="finSettlementMobile" style="display: none; grid-column: span 2;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Operator / Network:</span>
+                                    <span>{{ $platformAccount['mobile_network'] ?? 'Safaricom M-Pesa' }}</span>
+                                </div>
+                                <div id="finSettlementPaypal" style="display: none; grid-column: span 2;">
+                                    <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">PayPal Email:</span>
+                                    <span>{{ $platformAccount['paypal_email'] ?? 'finance@collegemusic.io' }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Card Inputs -->
+                        <div id="financeCardGroup">
+                            <div class="grid-cols-2">
+                                <div class="form-group">
+                                    <label class="form-label" for="fin_card_name">Name on Card</label>
+                                    <input type="text" id="fin_card_name" name="card_name" class="form-input" placeholder="e.g. John Doe" value="{{ Auth::user()->name }}">
+                                </div>
+
+                                <div class="form-group">
+                                    <label class="form-label" for="fin_card_number">Card Number</label>
+                                    <input type="text" id="fin_card_number" name="card_number" class="form-input" placeholder="xxxx xxxx xxxx xxxx" maxlength="19">
+                                </div>
+                            </div>
+
+                            <div class="grid-cols-2" style="margin-bottom: 1.5rem;">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label" for="fin_card_expiry">Expiry Date</label>
+                                    <input type="text" id="fin_card_expiry" name="card_expiry" class="form-input" placeholder="MM/YY" maxlength="5">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label" for="fin_card_cvc">CVC</label>
+                                    <input type="text" id="fin_card_cvc" name="card_cvc" class="form-input" placeholder="123" maxlength="4">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Reference Inputs -->
+                        <div id="financeManualGroup" style="display: none; margin-bottom: 1.5rem;">
+                            <div class="grid-cols-2">
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label" for="fin_trans_ref" id="finTransRefLabel">Transaction Reference / Slip Code</label>
+                                    <input type="text" id="fin_trans_ref" name="transaction_reference" class="form-input" placeholder="e.g. Wire Reference / M-Pesa Code">
+                                </div>
+                                <div class="form-group" style="margin-bottom: 0;">
+                                    <label class="form-label" for="fin_payer_phone">Sender Phone / Email</label>
+                                    <input type="text" id="fin_payer_phone" name="payer_phone" class="form-input" placeholder="e.g. +254712345678" value="{{ Auth::user()->phone ?? Auth::user()->email }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block" id="financeSubmitBtn">
+                            <i class="fa-solid fa-credit-card"></i> Pay $49.99 & Upgrade
                         </button>
                     </form>
                 @endif
@@ -504,6 +570,85 @@
         } else if (methodVal === 'bank_card') {
             label.textContent = 'Visa / Mastercard Payout Details';
             textarea.placeholder = 'Provide full cardholder name, card number, and expiration date.';
+        }
+    }
+
+    var financeSelectedPrice = 49.99;
+    function adjustFinancePlan(plan) {
+        if (plan === 'Artist Premium') financeSelectedPrice = 49.99;
+        else if (plan === 'Record Label Pro') financeSelectedPrice = 149.99;
+        else if (plan === 'VIP Lifetime') financeSelectedPrice = 299.99;
+        updateFinanceSubmitBtn();
+    }
+
+    function adjustFinancePaymentMethod(method) {
+        var cardGroup = document.getElementById('financeCardGroup');
+        var manualGroup = document.getElementById('financeManualGroup');
+        var settlementBox = document.getElementById('financeSettlementBox');
+
+        var bankDiv = document.getElementById('finSettlementBank');
+        var routingDiv = document.getElementById('finSettlementRouting');
+        var mobileDiv = document.getElementById('finSettlementMobile');
+        var paypalDiv = document.getElementById('finSettlementPaypal');
+        var transLabel = document.getElementById('finTransRefLabel');
+
+        var cardName = document.getElementById('fin_card_name');
+        var cardNum = document.getElementById('fin_card_number');
+        var cardExp = document.getElementById('fin_card_expiry');
+        var cardCvc = document.getElementById('fin_card_cvc');
+        var transRef = document.getElementById('fin_trans_ref');
+
+        if (method === 'card') {
+            if (cardGroup) cardGroup.style.display = 'block';
+            if (manualGroup) manualGroup.style.display = 'none';
+            if (settlementBox) settlementBox.style.display = 'none';
+
+            if (cardName) cardName.required = true;
+            if (cardNum) cardNum.required = true;
+            if (cardExp) cardExp.required = true;
+            if (cardCvc) cardCvc.required = true;
+            if (transRef) transRef.required = false;
+        } else {
+            if (cardGroup) cardGroup.style.display = 'none';
+            if (manualGroup) manualGroup.style.display = 'block';
+            if (settlementBox) settlementBox.style.display = 'block';
+
+            if (cardName) cardName.required = false;
+            if (cardNum) cardNum.required = false;
+            if (cardExp) cardExp.required = false;
+            if (cardCvc) cardCvc.required = false;
+            if (transRef) transRef.required = true;
+
+            if (method === 'bank_transfer') {
+                if (bankDiv) bankDiv.style.display = 'block';
+                if (routingDiv) routingDiv.style.display = 'block';
+                if (mobileDiv) mobileDiv.style.display = 'none';
+                if (paypalDiv) paypalDiv.style.display = 'none';
+                if (transLabel) transLabel.textContent = 'Bank Wire Reference / Deposit Code';
+            } else if (method === 'mobile_money') {
+                if (bankDiv) bankDiv.style.display = 'none';
+                if (routingDiv) routingDiv.style.display = 'none';
+                if (mobileDiv) mobileDiv.style.display = 'block';
+                if (paypalDiv) paypalDiv.style.display = 'none';
+                if (transLabel) transLabel.textContent = 'M-Pesa / Mobile Money Confirmation Reference';
+            } else if (method === 'paypal') {
+                if (bankDiv) bankDiv.style.display = 'none';
+                if (routingDiv) routingDiv.style.display = 'none';
+                if (mobileDiv) mobileDiv.style.display = 'none';
+                if (paypalDiv) paypalDiv.style.display = 'block';
+                if (transLabel) transLabel.textContent = 'PayPal Transaction ID / Payer Email';
+            }
+        }
+        updateFinanceSubmitBtn();
+    }
+
+    function updateFinanceSubmitBtn() {
+        var btn = document.getElementById('financeSubmitBtn');
+        var methodSelect = document.getElementById('finance_payment_method');
+        var method = methodSelect ? methodSelect.value : 'card';
+        var actionText = (method === 'card') ? 'Pay' : 'Confirm & Submit';
+        if (btn) {
+            btn.innerHTML = '<i class="fa-solid fa-credit-card"></i> ' + actionText + ' $' + financeSelectedPrice.toFixed(2) + ' & Upgrade';
         }
     }
 </script>

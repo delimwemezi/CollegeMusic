@@ -47,6 +47,7 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'changePassword'])->name('profile.password');
     Route::post('/profile/settings', [\App\Http\Controllers\ProfileController::class, 'updateSettings'])->name('profile.settings');
     Route::post('/profile/deactivate', [\App\Http\Controllers\ProfileController::class, 'deactivate'])->name('profile.deactivate');
+    Route::post('/profile/upgrade', [\App\Http\Controllers\PaymentController::class, 'processUpgrade'])->name('profile.upgrade');
     
     // Artist Verification & Profiles (FR6-FR7)
     Route::post('/artist/verify', [\App\Http\Controllers\ArtistController::class, 'submitVerification'])->name('artist.verify');
