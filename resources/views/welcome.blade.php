@@ -1097,102 +1097,295 @@
         .light-theme::view-transition-old(root) {
             z-index: 9999;
         }
-        .light-theme::view-transition-new(root) {
-            z-index: 1;
+        /* ==========================================
+           Isolated Content View Filtering System
+           ========================================== */
+        .landing-section {
+            transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* Fallback transition styles for browsers without view transitions */
-        .theme-in-transition * {
-            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease !important;
+        /* Active Navigation Link Styling */
+        .nav-link.active, .nav-view-btn.active {
+            color: var(--primary) !important;
+            font-weight: 700;
+            position: relative;
         }
 
-        /* Language Translation Curtain Sweep Overlay */
-        .lang-transition-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            z-index: 100000;
-            pointer-events: none;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            visibility: hidden;
-        }
-        .lang-transition-curtain {
+        .nav-link.active::after, .nav-view-btn.active::after {
+            content: '';
             position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 50% 50%, var(--bg-card), var(--bg-main));
-            transform: translateY(100%);
-            transition: transform 0.6s cubic-bezier(0.77, 0, 0.175, 1);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            border-top: 4px solid var(--primary);
-            box-shadow: 0 -10px 40px rgba(0, 0, 0, 0.3);
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary), #818cf8);
+            border-radius: var(--radius-full);
+            box-shadow: 0 0 10px var(--primary);
         }
-        .lang-transition-logo {
+
+        /* Mobile View Switcher Pill Bar */
+        .mobile-view-tabs-container {
+            display: none;
+            width: 100%;
+            background: rgba(11, 15, 25, 0.95);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 70px;
+            z-index: 990;
+            padding: 0.6rem 1rem;
+        }
+
+        .mobile-view-tabs {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            gap: 0.5rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            scrollbar-width: none;
+        }
+
+        .mobile-view-tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .mobile-tab-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 0.9rem;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            font-weight: 600;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .mobile-tab-btn:hover {
+            color: #fff;
+            border-color: var(--primary);
+        }
+
+        .mobile-tab-btn.active {
+            background: linear-gradient(135deg, var(--primary), #4f46e5);
+            color: #fff;
+            border-color: transparent;
+            box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        @media (max-width: 968px) {
+            .mobile-view-tabs-container {
+                display: block;
+            }
+        }
+
+        /* Contextual View Header Banner when isolated */
+        .view-context-banner {
+            display: none;
+            margin-bottom: 3rem;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(17, 24, 39, 0.6));
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem 2rem;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            animation: viewFadeIn 0.35s ease forwards;
+        }
+
+        body:not([data-view="all"]) .view-context-banner {
+            display: flex;
+        }
+
+        .view-context-info {
+            display: flex;
+            align-items: center;
+            gap: 0.85rem;
+        }
+
+        .view-context-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.35rem 0.85rem;
+            border-radius: var(--radius-full);
+            background: var(--primary);
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .view-context-title {
             font-family: var(--font-heading);
-            font-size: 2.25rem;
+            font-size: 1.15rem;
             font-weight: 700;
             color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 1.25rem;
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.4s ease, transform 0.4s ease;
+            margin: 0;
         }
-        .lang-transition-logo i {
+
+        /* =======================================================
+           VIEW ISOLATION LOGIC: Strictly display only the chosen section
+           ======================================================= */
+        body[data-view="features"] .landing-section:not([data-section="features"]),
+        body[data-view="features"] .hero,
+        body[data-view="features"] .platforms-section,
+        body[data-view="features"] .pricing,
+        body[data-view="features"] .testimonials,
+        body[data-view="features"] .cta-section {
+            display: none !important;
+        }
+
+        body[data-view="platforms"] .landing-section:not([data-section="platforms"]),
+        body[data-view="platforms"] .hero,
+        body[data-view="platforms"] .features,
+        body[data-view="platforms"] .steps-section,
+        body[data-view="platforms"] .pricing,
+        body[data-view="platforms"] .testimonials,
+        body[data-view="platforms"] .cta-section {
+            display: none !important;
+        }
+
+        body[data-view="pricing"] .landing-section:not([data-section="pricing"]),
+        body[data-view="pricing"] .hero,
+        body[data-view="pricing"] .platforms-section,
+        body[data-view="pricing"] .features,
+        body[data-view="pricing"] .steps-section,
+        body[data-view="pricing"] .testimonials,
+        body[data-view="pricing"] .cta-section {
+            display: none !important;
+        }
+
+        /* Active Isolated Section Spacing & Transitions */
+        body:not([data-view="all"]) .features,
+        body:not([data-view="all"]) .platforms-section,
+        body:not([data-view="all"]) .pricing {
+            padding-top: 140px;
+            min-height: 85vh;
+            animation: viewFadeIn 0.35s ease forwards;
+        }
+
+        @keyframes viewFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(15px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Pricing comparison matrix table */
+        .comparison-table-wrapper {
+            margin-top: 4rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: 2rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .comparison-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            min-width: 600px;
+        }
+
+        .comparison-table th {
+            padding: 1rem 1.25rem;
+            text-align: left;
+            font-family: var(--font-heading);
+            font-weight: 700;
+            border-bottom: 2px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .comparison-table td {
+            padding: 1rem 1.25rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--text-secondary);
+        }
+
+        .comparison-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        /* Platform Feature Showcase Cards */
+        .dsp-specs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 1.5rem;
+            margin-top: 3.5rem;
+        }
+
+        .dsp-spec-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 1.75rem;
+            text-align: left;
+            transition: var(--transition);
+        }
+
+        .dsp-spec-card:hover {
+            border-color: rgba(99, 102, 241, 0.4);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(99, 102, 241, 0.1);
+        }
+
+        .dsp-spec-icon {
+            font-size: 1.75rem;
             color: var(--primary);
-            animation: rotateMusicSign 2s linear infinite;
-            text-shadow: 0 0 15px rgba(99, 102, 241, 0.4);
-        }
-
-        .lang-transition-overlay.active {
-            visibility: visible;
-            pointer-events: all;
-        }
-        .lang-transition-overlay.active .lang-transition-curtain {
-            transform: translateY(0);
-        }
-        .lang-transition-overlay.active .lang-transition-logo {
-            opacity: 1;
-            transform: translateY(0);
-            transition-delay: 0.25s;
-        }
-
-        .lang-transition-overlay.exit {
-            visibility: visible;
-            pointer-events: all;
-        }
-        .lang-transition-overlay.exit .lang-transition-curtain {
-            transform: translateY(-100%);
-        }
-        .lang-transition-overlay.exit .lang-transition-logo {
-            opacity: 0;
-            transform: translateY(-30px);
+            margin-bottom: 1rem;
         }
     </style>
 </head>
-<body id="top">
+<body id="top" data-view="all">
 
     <!-- Sticky Navigation -->
     <nav class="navbar">
         <div class="container navbar-content">
-            <a href="{{ route('home') }}" onclick="if(window.location.pathname==='/' || window.location.pathname.endsWith('/')){ window.scrollTo({top:0, behavior:'smooth'}); }" class="logo">
+            <a href="javascript:void(0)" onclick="switchViewMode('all')" class="logo" title="CollegeMusic Home">
                 <i class="fa-solid fa-music"></i> <span class="logo-text">CollegeMusic</span>
             </a>
             <ul class="nav-links">
-                <li><a href="#features" class="nav-link">{{ __('messages.features') }}</a></li>
-                <li><a href="#platforms" class="nav-link">{{ __('messages.platforms') }}</a></li>
-                <li><a href="#pricing" class="nav-link">{{ __('messages.pricing') }}</a></li>
-                <li><a href="{{ route('explore') }}" class="nav-link" style="color: var(--primary); font-weight: bold;"><i class="fa-solid fa-compass"></i> {{ __('messages.explore_music') }}</a></li>
+                <li>
+                    <a href="javascript:void(0)" onclick="switchViewMode('all')" class="nav-link nav-view-btn active" data-view-target="all">
+                        <i class="fa-solid fa-house" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.home') ?? 'Home' }}
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="switchViewMode('features')" class="nav-link nav-view-btn" data-view-target="features">
+                        <i class="fa-solid fa-layer-group" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.features') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="switchViewMode('platforms')" class="nav-link nav-view-btn" data-view-target="platforms">
+                        <i class="fa-solid fa-tower-broadcast" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.platforms') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="javascript:void(0)" onclick="switchViewMode('pricing')" class="nav-link nav-view-btn" data-view-target="pricing">
+                        <i class="fa-solid fa-tags" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.pricing') }}
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('explore') }}" class="nav-link" style="color: var(--primary); font-weight: bold;">
+                        <i class="fa-solid fa-compass"></i> {{ __('messages.explore_music') }}
+                    </a>
+                </li>
             </ul>
             <div class="nav-actions" style="display: flex; align-items: center; gap: 1rem;">
                 <!-- Theme Switcher -->
@@ -1216,8 +1409,26 @@
         </div>
     </nav>
 
+    <!-- Mobile View Filter Tab Pills Bar -->
+    <div class="mobile-view-tabs-container">
+        <div class="mobile-view-tabs">
+            <button type="button" class="mobile-tab-btn active" data-view-target="all" onclick="switchViewMode('all')">
+                <i class="fa-solid fa-house"></i> All
+            </button>
+            <button type="button" class="mobile-tab-btn" data-view-target="features" onclick="switchViewMode('features')">
+                <i class="fa-solid fa-layer-group"></i> {{ __('messages.features') }}
+            </button>
+            <button type="button" class="mobile-tab-btn" data-view-target="platforms" onclick="switchViewMode('platforms')">
+                <i class="fa-solid fa-tower-broadcast"></i> {{ __('messages.platforms') }}
+            </button>
+            <button type="button" class="mobile-tab-btn" data-view-target="pricing" onclick="switchViewMode('pricing')">
+                <i class="fa-solid fa-tags"></i> {{ __('messages.pricing') }}
+            </button>
+        </div>
+    </div>
+
     <!-- Hero Section -->
-    <header class="hero">
+    <header class="hero landing-section" data-section="hero">
         <!-- Floating Headphones Background -->
         <div class="bg-headphones-container">
             <div class="floating-headphone" style="font-size: 8rem; top: 10%; left: 5%; animation-duration: 12s; animation-delay: 0s;">
@@ -1245,7 +1456,7 @@
                 </p>
                 <div class="hero-actions">
                     <a href="{{ route('register') }}" class="btn btn-primary"><i class="fa-solid fa-play"></i> {{ __('messages.distribute_now') }}</a>
-                    <a href="#features" class="btn btn-secondary">{{ __('messages.learn_more') }}</a>
+                    <a href="javascript:void(0)" onclick="switchViewMode('features')" class="btn btn-secondary"><i class="fa-solid fa-layer-group"></i> {{ __('messages.learn_more') }}</a>
                 </div>
             </div>
             
@@ -1305,10 +1516,23 @@
         </div>
     </header>
 
-    <!-- Ingestion Partners Showcase -->
-    <section class="platforms-section" id="platforms">
+    <!-- Ingestion Partners & DSP Showcase Section -->
+    <section class="platforms-section landing-section" id="platforms" data-section="platforms">
         <div class="container">
+            <!-- Contextual Banner when in Platforms-only view -->
+            <div class="view-context-banner">
+                <div class="view-context-info">
+                    <span class="view-context-badge"><i class="fa-solid fa-tower-broadcast"></i> {{ __('messages.platforms') }}</span>
+                    <h3 class="view-context-title">Global Digital Streaming Platforms & Store Ingestion</h3>
+                </div>
+                <button type="button" onclick="switchViewMode('all')" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-layer-group"></i> View All Content
+                </button>
+            </div>
+
             <h3 class="platforms-title">{{ __('messages.partnership_title') }}</h3>
+            
+            <!-- Global DSP Partner Icons Grid -->
             <div class="platforms-grid">
                 <div class="platform-icon"><i class="fa-brands fa-spotify"></i><span>Spotify</span></div>
                 <div class="platform-icon"><i class="fa-brands fa-apple"></i><span>Apple Music</span></div>
@@ -1316,13 +1540,65 @@
                 <div class="platform-icon"><i class="fa-brands fa-amazon"></i><span>Amazon Music</span></div>
                 <div class="platform-icon"><i class="fa-brands fa-deezer"></i><span>Deezer</span></div>
                 <div class="platform-icon"><i class="fa-brands fa-tiktok"></i><span>TikTok</span></div>
+                <div class="platform-icon"><i class="fa-brands fa-soundcloud"></i><span>SoundCloud</span></div>
+                <div class="platform-icon"><i class="fa-solid fa-radio"></i><span>Pandora</span></div>
+                <div class="platform-icon"><i class="fa-solid fa-compact-disc"></i><span>Tidal</span></div>
+                <div class="platform-icon"><i class="fa-solid fa-play"></i><span>Audiomack</span></div>
+                <div class="platform-icon"><i class="fa-brands fa-instagram"></i><span>Instagram Audio</span></div>
+                <div class="platform-icon"><i class="fa-solid fa-bolt"></i><span>Shazam</span></div>
+            </div>
+
+            <!-- In-Depth DSP Specifications Grid -->
+            <div class="dsp-specs-grid">
+                <div class="dsp-spec-card">
+                    <div class="dsp-spec-icon"><i class="fa-solid fa-bolt-lightning"></i></div>
+                    <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">48-Hour Rapid Ingestion</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5;">
+                        Direct API pipelines deliver your mastered tracks to Spotify, Apple, and Amazon store servers in as little as 24 to 48 hours with guaranteed release date scheduling.
+                    </p>
+                </div>
+
+                <div class="dsp-spec-card">
+                    <div class="dsp-spec-icon"><i class="fa-solid fa-music"></i></div>
+                    <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Lossless 24-Bit Hi-Res Audio</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5;">
+                        Upload 24-bit 96kHz lossless FLAC and uncompressed WAV files. Our pipeline formats your master audio precisely for Spatial Audio and HD streaming outlets.
+                    </p>
+                </div>
+
+                <div class="dsp-spec-card">
+                    <div class="dsp-spec-icon"><i class="fa-solid fa-fingerprint"></i></div>
+                    <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">Automated Content ID & Reels</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5;">
+                        Full automated audio fingerprinting monetizes every YouTube video, TikTok sound, and Instagram Reel containing your songs, ensuring zero lost royalties.
+                    </p>
+                </div>
+
+                <div class="dsp-spec-card">
+                    <div class="dsp-spec-icon"><i class="fa-solid fa-globe"></i></div>
+                    <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.5rem;">150+ Territory Ingestion</h4>
+                    <p style="color: var(--text-secondary); font-size: 0.88rem; line-height: 1.5;">
+                        Worldwide distribution reach covers North America, Europe, Africa, Asia, and Latin America with automatic localized currency and store metadata conversion.
+                    </p>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section class="features" id="features">
+    <section class="features landing-section" id="features" data-section="features">
         <div class="container">
+            <!-- Contextual Banner when in Features-only view -->
+            <div class="view-context-banner">
+                <div class="view-context-info">
+                    <span class="view-context-badge"><i class="fa-solid fa-layer-group"></i> {{ __('messages.features') }}</span>
+                    <h3 class="view-context-title">Platform Features & Distribution Capabilities</h3>
+                </div>
+                <button type="button" onclick="switchViewMode('all')" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-layer-group"></i> View All Content
+                </button>
+            </div>
+
             <div class="section-header">
                 <span class="section-tag">{{ __('messages.features_tag') }}</span>
                 <h2 class="section-heading">{{ __('messages.features_heading') }}</h2>
@@ -1370,7 +1646,7 @@
     </section>
 
     <!-- How It Works Section -->
-    <section class="steps-section">
+    <section class="steps-section landing-section" data-section="features">
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">{{ __('messages.how_tag') }}</span>
@@ -1404,8 +1680,19 @@
     </section>
 
     <!-- Pricing Section -->
-    <section class="pricing" id="pricing">
+    <section class="pricing landing-section" id="pricing" data-section="pricing">
         <div class="container">
+            <!-- Contextual Banner when in Pricing-only view -->
+            <div class="view-context-banner">
+                <div class="view-context-info">
+                    <span class="view-context-badge"><i class="fa-solid fa-tags"></i> {{ __('messages.pricing') }}</span>
+                    <h3 class="view-context-title">Transparent Membership Plans & Distribution Pricing</h3>
+                </div>
+                <button type="button" onclick="switchViewMode('all')" class="btn btn-secondary btn-sm">
+                    <i class="fa-solid fa-layer-group"></i> View All Content
+                </button>
+            </div>
+
             <div class="section-header">
                 <span class="section-tag">{{ __('messages.pricing_tag') }}</span>
                 <h2 class="section-heading">{{ __('messages.pricing_heading') }}</h2>
@@ -1465,11 +1752,78 @@
                     <a href="{{ route('register') }}" class="btn btn-secondary price-btn">{{ __('messages.register_label') }}</a>
                 </div>
             </div>
+
+            <!-- Side-by-Side Plan Comparison Table Matrix -->
+            <div class="comparison-table-wrapper">
+                <h3 style="font-family: var(--font-heading); font-size: 1.3rem; margin-bottom: 1.5rem; color: var(--text-primary);">
+                    <i class="fa-solid fa-table-list" style="color: var(--primary); margin-right: 0.5rem;"></i> Complete Feature Comparison Matrix
+                </h3>
+                <table class="comparison-table">
+                    <thead>
+                        <tr>
+                            <th style="width: 40%;">Feature Breakdown</th>
+                            <th style="text-align: center;">Artist Free</th>
+                            <th style="text-align: center; color: var(--primary);">Artist Premium</th>
+                            <th style="text-align: center;">Record Label Pro</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Annual Subscription Fee</strong></td>
+                            <td style="text-align: center;">$0 / year</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--primary);">$49.99 / year</td>
+                            <td style="text-align: center; font-weight: 700;">$149.99 / year</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Distribution Releases</strong></td>
+                            <td style="text-align: center;">Pay-Per-Release ($9.99)</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--success);">Unlimited Free</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--success);">Unlimited Free</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Royalty Retention</strong></td>
+                            <td style="text-align: center;">100% Artist Keep</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--success);">100% Artist Keep</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--success);">100% Artist Keep</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Supported Artists Profiles</strong></td>
+                            <td style="text-align: center;">1 Artist Profile</td>
+                            <td style="text-align: center;">1 Artist Profile</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--primary);">Unlimited Label Artists</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Free ISRC & UPC Barcodes</strong></td>
+                            <td style="text-align: center;"><i class="fa-solid fa-check" style="color: var(--success);"></i></td>
+                            <td style="text-align: center;"><i class="fa-solid fa-check" style="color: var(--success);"></i></td>
+                            <td style="text-align: center;"><i class="fa-solid fa-check" style="color: var(--success);"></i></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Real-Time Stream Trend Analytics</strong></td>
+                            <td style="text-align: center;">Standard Daily</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--primary);">Real-Time & Geo Demographics</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--primary);">Advanced Multi-Artist Analytics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Withdrawal Settlement Methods</strong></td>
+                            <td style="text-align: center;">Bank, Mobile Money, PayPal</td>
+                            <td style="text-align: center;">Bank, Mobile Money, PayPal</td>
+                            <td style="text-align: center;">Bank, Mobile Money, PayPal, Swift</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Review & Ingestion Priority</strong></td>
+                            <td style="text-align: center;">Standard (48-72h)</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--primary);">Express Fast-Track (24h)</td>
+                            <td style="text-align: center; font-weight: 700; color: var(--primary);">VIP Dedicated Account Manager</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </section>
 
     <!-- Testimonials Section -->
-    <section class="testimonials" id="testimonials">
+    <section class="testimonials landing-section" id="testimonials" data-section="testimonials">
         <div class="container">
             <div class="section-header">
                 <span class="section-tag">{{ __('messages.success_stories') }}</span>
@@ -1521,7 +1875,7 @@
     </section>
 
     <!-- CTA Section -->
-    <section class="cta-section">
+    <section class="cta-section landing-section" data-section="cta">
         <div class="container">
             <div class="cta-box">
                 <h2 class="cta-title">{{ __('messages.ready_share') }}</h2>
@@ -1532,11 +1886,11 @@
     </section>
 
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="footer landing-section" data-section="footer">
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <a href="{{ route('home') }}" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" class="footer-logo" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;" title="Go to Top / Home Page">
+                    <a href="javascript:void(0)" onclick="switchViewMode('all')" class="footer-logo" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;" title="Go to Top / Home Page">
                         <i class="fa-solid fa-music" style="color: var(--primary);"></i> CollegeMusic
                     </a>
                     <p class="footer-desc">{{ __('messages.footer_tagline') }}</p>
@@ -1549,12 +1903,12 @@
                 </div>
                 
                 <div>
-                    <h4 class="footer-col-title">Navigation & Shortcuts</h4>
+                    <h4 class="footer-col-title">Navigation & Views</h4>
                     <ul class="footer-menu">
-                        <li><a href="{{ route('home') }}" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" class="footer-menu-link" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-house" style="margin-right: 0.35rem;"></i> Home Page</a></li>
-                        <li><a href="{{ route('dashboard') }}" class="footer-menu-link"><i class="fa-solid fa-gauge-high" style="margin-right: 0.35rem;"></i> App Dashboard</a></li>
-                        <li><a href="#features" class="footer-menu-link"><i class="fa-solid fa-layer-group" style="margin-right: 0.35rem;"></i> Platform Features</a></li>
-                        <li><a href="#pricing" class="footer-menu-link"><i class="fa-solid fa-tags" style="margin-right: 0.35rem;"></i> Distribution Pricing</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchViewMode('all')" class="footer-menu-link" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-house" style="margin-right: 0.35rem;"></i> Overview / Home</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchViewMode('features')" class="footer-menu-link"><i class="fa-solid fa-layer-group" style="margin-right: 0.35rem;"></i> Platform Features</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchViewMode('platforms')" class="footer-menu-link"><i class="fa-solid fa-tower-broadcast" style="margin-right: 0.35rem;"></i> DSP Platforms</a></li>
+                        <li><a href="javascript:void(0)" onclick="switchViewMode('pricing')" class="footer-menu-link"><i class="fa-solid fa-tags" style="margin-right: 0.35rem;"></i> Distribution Pricing</a></li>
                     </ul>
                 </div>
                 
@@ -1582,7 +1936,7 @@
             <div class="footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
                 <span>&copy; {{ date('Y') }} CollegeMusic Inc. {{ __('messages.all_rights_reserved') }} Made for independent music artists & record labels.</span>
                 <div style="display: flex; align-items: center; gap: 1.25rem;">
-                    <a href="{{ route('home') }}" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" style="color: var(--primary); text-decoration: none; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;" title="Go to Home Page">
+                    <a href="javascript:void(0)" onclick="switchViewMode('all')" style="color: var(--primary); text-decoration: none; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;" title="Go to Home Page">
                         <i class="fa-solid fa-house"></i> Home
                     </a>
                     <a href="javascript:void(0)" onclick="window.scrollTo({top:0, behavior:'smooth'})" style="color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem;">
@@ -1594,6 +1948,66 @@
     </footer>
 
     <script>
+        // Dynamic Content View Filtering System
+        function switchViewMode(mode, updateHistory = true) {
+            const validModes = ['all', 'features', 'platforms', 'pricing'];
+            if (!validModes.includes(mode)) {
+                mode = 'all';
+            }
+
+            // Set data-view on body for pure CSS isolation
+            document.body.setAttribute('data-view', mode);
+
+            // Update all Desktop Navigation link active classes
+            document.querySelectorAll('.nav-view-btn').forEach(btn => {
+                const target = btn.getAttribute('data-view-target');
+                if (target === mode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update Mobile Tabs active state
+            document.querySelectorAll('.mobile-tab-btn').forEach(btn => {
+                const target = btn.getAttribute('data-view-target');
+                if (target === mode) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+
+            // Update URL hash without causing full page reload
+            if (updateHistory) {
+                const newHash = mode === 'all' ? '#all' : '#' + mode;
+                if (window.location.hash !== newHash) {
+                    history.pushState(null, null, newHash);
+                }
+            }
+
+            // Smooth scroll to top so the selected content starts right at the top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Initialize view mode from URL Hash or load default
+        function initViewModeFromHash() {
+            const hash = window.location.hash.replace('#', '').toLowerCase();
+            if (['features', 'platforms', 'pricing'].includes(hash)) {
+                switchViewMode(hash, false);
+            } else {
+                switchViewMode('all', false);
+            }
+        }
+
+        window.addEventListener('hashchange', () => {
+            initViewModeFromHash();
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initViewModeFromHash();
+        });
+
         function toggleTheme(event) {
             const html = document.documentElement;
             
