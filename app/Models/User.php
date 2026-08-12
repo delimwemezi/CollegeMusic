@@ -19,6 +19,7 @@ class User extends Authenticatable
         'status',
         'verification_code',
         'notification_preferences',
+        'payout_account',
         'email_verified_at',
         'phone_verified_at',
     ];
@@ -35,6 +36,7 @@ class User extends Authenticatable
             'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'notification_preferences' => 'array',
+            'payout_account' => 'array',
         ];
     }
 

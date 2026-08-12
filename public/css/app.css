@@ -577,7 +577,8 @@ input::-webkit-credentials-auto-fill-button {
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow-sm);
     margin-bottom: 1.5rem;
-    overflow: hidden;
+    max-width: 100%;
+    position: relative;
 }
 
 .card-header {
@@ -595,12 +596,58 @@ input::-webkit-credentials-auto-fill-button {
 
 .card-body {
     padding: 1.5rem;
+    overflow-x: auto;
+    overflow-y: auto;
+    max-width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Scrollbars for cards and tables */
+.card-body::-webkit-scrollbar,
+.table-responsive::-webkit-scrollbar,
+.card::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+
+.card-body::-webkit-scrollbar-track,
+.table-responsive::-webkit-scrollbar-track,
+.card::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.card-body::-webkit-scrollbar-thumb,
+.table-responsive::-webkit-scrollbar-thumb,
+.card::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 4px;
+}
+
+.card-body::-webkit-scrollbar-thumb:hover,
+.table-responsive::-webkit-scrollbar-thumb:hover,
+.card::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.28);
+}
+
+.light-theme .card-body::-webkit-scrollbar-thumb,
+.light-theme .table-responsive::-webkit-scrollbar-thumb,
+.light-theme .card::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.15);
+}
+
+.light-theme .card-body::-webkit-scrollbar-thumb:hover,
+.light-theme .table-responsive::-webkit-scrollbar-thumb:hover,
+.light-theme .card::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.3);
 }
 
 /* Tables */
 .table-responsive {
     width: 100%;
     overflow-x: auto;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
 
@@ -780,6 +827,13 @@ input::-webkit-credentials-auto-fill-button {
     display: flex;
     flex-direction: column;
     align-items: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.wizard-step:hover .step-number {
+    border-color: var(--primary);
+    color: var(--text-primary);
 }
 
 .step-number {
@@ -820,6 +874,11 @@ input::-webkit-credentials-auto-fill-button {
     background-color: var(--success);
     border-color: var(--success);
     color: #fff;
+}
+
+.is-invalid {
+    border-color: var(--danger) !important;
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25) !important;
 }
 
 /* Audio Player */

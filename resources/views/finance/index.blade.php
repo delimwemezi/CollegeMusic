@@ -50,6 +50,136 @@
 </div>
 
 <div class="grid-cols-2">
+    <!-- Artist Payout Receiving Account Settings -->
+    <div>
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title"><i class="fa-solid fa-building-columns"></i> Receiving Payout Account</h3>
+                @if($payoutAccount)
+                    <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Account Configured</span>
+                @else
+                    <span class="badge badge-pending"><i class="fa-solid fa-triangle-exclamation"></i> Not Configured</span>
+                @endif
+            </div>
+            <div class="card-body">
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 1.25rem; line-height: 1.5;">
+                    Set your permanent banking or digital account details to receive your accumulated royalties after payout calculations and platform processing.
+                </p>
+
+                @if($payoutAccount)
+                    <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                            <div>
+                                <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700; letter-spacing: 0.05em;">
+                                    {{ strtoupper(str_replace('_', ' ', $payoutAccount['payout_method'] ?? 'bank_transfer')) }}
+                                </span>
+                                <h4 style="margin: 0.25rem 0 0; color: var(--text-primary); font-size: 1.05rem;">
+                                    {{ $payoutAccount['account_name'] ?? 'Account Holder' }}
+                                </h4>
+                            </div>
+                            <span class="badge badge-approved" style="font-size: 0.7rem;">Active Target</span>
+                        </div>
+
+                        <div class="grid-cols-2" style="gap: 0.75rem; font-size: 0.85rem; margin-bottom: 0.5rem;">
+                            <div>
+                                <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Account / Phone / IBAN:</span>
+                                <strong style="font-family: monospace; color: var(--text-primary);">
+                                    {{ $payoutAccount['account_number'] ?? 'N/A' }}
+                                </strong>
+                            </div>
+                            @if(!empty($payoutAccount['bank_name']))
+                                <div>
+                                    <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Bank / Institution:</span>
+                                    <span style="color: var(--text-primary);">{{ $payoutAccount['bank_name'] }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($payoutAccount['routing_number']))
+                                <div>
+                                    <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Routing / SWIFT:</span>
+                                    <span style="font-family: monospace; color: var(--text-primary);">{{ $payoutAccount['routing_number'] }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($payoutAccount['mobile_network']))
+                                <div>
+                                    <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Mobile Network:</span>
+                                    <span style="color: var(--text-primary);">{{ $payoutAccount['mobile_network'] }}</span>
+                                </div>
+                            @endif
+                            @if(!empty($payoutAccount['paypal_email']))
+                                <div>
+                                    <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">PayPal Email:</span>
+                                    <span style="color: var(--text-primary);">{{ $payoutAccount['paypal_email'] }}</span>
+                                </div>
+                            @endif
+                        </div>
+
+                        <div style="font-size: 0.75rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.5rem; margin-top: 0.5rem;">
+                            Last Updated: {{ $payoutAccount['updated_at'] ?? 'Recently' }}
+                        </div>
+                    </div>
+                @endif
+
+                <!-- Form to update payout receiving account -->
+                <details {{ empty($payoutAccount) ? 'open' : '' }} style="border-top: 1px solid var(--border-color); padding-top: 1rem;">
+                    <summary style="cursor: pointer; font-weight: 600; font-size: 0.9rem; color: var(--primary); margin-bottom: 1rem;">
+                        <i class="fa-solid fa-pen-to-square"></i> {{ $payoutAccount ? 'Update Payout Receiving Account' : 'Set Up Payout Receiving Account' }}
+                    </summary>
+
+                    <form action="{{ route('finance.payout_account') }}" method="POST">
+                        @csrf
+                        <div class="form-group">
+                            <label class="form-label" for="setting_payout_method">Payout Receiving Method</label>
+                            <select id="setting_payout_method" name="payout_method" class="form-select" onchange="adjustPayoutMethodFields(this.value)" required>
+                                <option value="bank_transfer" {{ ($payoutAccount['payout_method'] ?? '') === 'bank_transfer' ? 'selected' : '' }}>Direct Bank Transfer (Wire / ACH / SEPA)</option>
+                                <option value="mobile_money" {{ ($payoutAccount['payout_method'] ?? '') === 'mobile_money' ? 'selected' : '' }}>Mobile Money (M-Pesa, Airtel, MTN)</option>
+                                <option value="paypal" {{ ($payoutAccount['payout_method'] ?? '') === 'paypal' ? 'selected' : '' }}>PayPal Account</option>
+                                <option value="bank_card" {{ ($payoutAccount['payout_method'] ?? '') === 'bank_card' ? 'selected' : '' }}>Debit / Credit Card Payout</option>
+                            </select>
+                        </div>
+
+                        <div class="grid-cols-2">
+                            <div class="form-group">
+                                <label class="form-label" for="setting_account_name">Account Holder Full Name</label>
+                                <input type="text" id="setting_account_name" name="account_name" class="form-input" placeholder="e.g. John Doe / Label Records LLC" value="{{ old('account_name', $payoutAccount['account_name'] ?? Auth::user()->name) }}" required>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="setting_account_number" id="settingAccountNumLabel">Account Number / IBAN / Phone</label>
+                                <input type="text" id="setting_account_number" name="account_number" class="form-input" placeholder="e.g. 123456789012" value="{{ old('account_number', $payoutAccount['account_number'] ?? '') }}" required>
+                            </div>
+                        </div>
+
+                        <div id="bankFieldsGroup" style="{{ ($payoutAccount['payout_method'] ?? 'bank_transfer') === 'bank_transfer' ? 'display: grid;' : 'display: none;' }}" class="grid-cols-2">
+                            <div class="form-group">
+                                <label class="form-label" for="setting_bank_name">Bank Name</label>
+                                <input type="text" id="setting_bank_name" name="bank_name" class="form-input" placeholder="e.g. Barclays, Citibank, Chase" value="{{ old('bank_name', $payoutAccount['bank_name'] ?? '') }}">
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="setting_routing_number">SWIFT / BIC / Routing Code</label>
+                                <input type="text" id="setting_routing_number" name="routing_number" class="form-input" placeholder="e.g. CHASUS33XXX" value="{{ old('routing_number', $payoutAccount['routing_number'] ?? '') }}">
+                            </div>
+                        </div>
+
+                        <div id="mobileFieldsGroup" style="{{ ($payoutAccount['payout_method'] ?? '') === 'mobile_money' ? 'display: block;' : 'display: none;' }}" class="form-group">
+                            <label class="form-label" for="setting_mobile_network">Mobile Money Operator / Network</label>
+                            <input type="text" id="setting_mobile_network" name="mobile_network" class="form-input" placeholder="e.g. M-Pesa, MTN Mobile Money, Airtel Money" value="{{ old('mobile_network', $payoutAccount['mobile_network'] ?? '') }}">
+                        </div>
+
+                        <div id="paypalFieldsGroup" style="{{ ($payoutAccount['payout_method'] ?? '') === 'paypal' ? 'display: block;' : 'display: none;' }}" class="form-group">
+                            <label class="form-label" for="setting_paypal_email">Registered PayPal Email</label>
+                            <input type="email" id="setting_paypal_email" name="paypal_email" class="form-input" placeholder="e.g. payment@artistname.com" value="{{ old('paypal_email', $payoutAccount['paypal_email'] ?? Auth::user()->email) }}">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fa-solid fa-floppy-disk"></i> Save Payout Receiving Account
+                        </button>
+                    </form>
+                </details>
+            </div>
+        </div>
+    </div>
+
     <!-- Payout Request Form -->
     <div>
         <div class="card">
@@ -66,6 +196,19 @@
                         </p>
                     </div>
                 @else
+                    @if($payoutAccount)
+                        <div style="margin-bottom: 1.25rem; padding: 0.85rem 1rem; border-radius: var(--radius-md); background-color: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: space-between;">
+                            <div style="font-size: 0.85rem;">
+                                <i class="fa-solid fa-check-circle" style="color: var(--success); margin-right: 0.35rem;"></i>
+                                <span style="color: var(--text-primary); font-weight: 600;">Saved Target:</span> 
+                                <span style="color: var(--text-secondary);">{{ $payoutAccount['account_name'] }} ({{ $payoutAccount['account_number'] }})</span>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="populateSavedPayoutAccount()" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+                                <i class="fa-solid fa-bolt"></i> Auto-Fill
+                            </button>
+                        </div>
+                    @endif
+
                     <form action="{{ route('finance.withdraw') }}" method="POST">
                         @csrf
                         <div class="form-group">
@@ -80,16 +223,26 @@
                         <div class="form-group">
                             <label class="form-label" for="payment_method">Select Payout Method</label>
                             <select id="payment_method" name="payment_method" class="form-select" onchange="toggleDetailsPlaceholder()" required>
-                                <option value="bank_transfer">Direct Bank Transfer</option>
-                                <option value="paypal">PayPal Email</option>
-                                <option value="mobile_money">Mobile Money Account</option>
-                                <option value="bank_card">Visa/Mastercard Direct Payout</option>
+                                <option value="bank_transfer" {{ ($payoutAccount['payout_method'] ?? '') === 'bank_transfer' ? 'selected' : '' }}>Direct Bank Transfer</option>
+                                <option value="mobile_money" {{ ($payoutAccount['payout_method'] ?? '') === 'mobile_money' ? 'selected' : '' }}>Mobile Money Account</option>
+                                <option value="paypal" {{ ($payoutAccount['payout_method'] ?? '') === 'paypal' ? 'selected' : '' }}>PayPal Email</option>
+                                <option value="bank_card" {{ ($payoutAccount['payout_method'] ?? '') === 'bank_card' ? 'selected' : '' }}>Visa/Mastercard Direct Payout</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label class="form-label" for="payment_details" id="detailsLabel">Bank Transfer Details</label>
-                            <textarea id="payment_details" name="payment_details" class="form-textarea" rows="3" placeholder="Provide bank name, swift code, routing number, account number, and account holder name." required>{{ old('payment_details') }}</textarea>
+                            <label class="form-label" for="payment_details" id="detailsLabel">Payment Destination Details</label>
+                            @php
+                                $defaultDetails = '';
+                                if ($payoutAccount) {
+                                    $defaultDetails = "Holder: " . ($payoutAccount['account_name'] ?? '') . "\nAccount/Phone: " . ($payoutAccount['account_number'] ?? '');
+                                    if (!empty($payoutAccount['bank_name'])) $defaultDetails .= "\nBank: " . $payoutAccount['bank_name'];
+                                    if (!empty($payoutAccount['routing_number'])) $defaultDetails .= "\nSWIFT/Routing: " . $payoutAccount['routing_number'];
+                                    if (!empty($payoutAccount['mobile_network'])) $defaultDetails .= "\nNetwork: " . $payoutAccount['mobile_network'];
+                                    if (!empty($payoutAccount['paypal_email'])) $defaultDetails .= "\nPayPal: " . $payoutAccount['paypal_email'];
+                                }
+                            @endphp
+                            <textarea id="payment_details" name="payment_details" class="form-textarea" rows="3" placeholder="Provide bank name, swift code, routing number, account number, and account holder name." required>{{ old('payment_details', $defaultDetails) }}</textarea>
                             @error('payment_details')
                                 <span class="invalid-feedback">{{ $message }}</span>
                             @enderror
@@ -103,7 +256,9 @@
             </div>
         </div>
     </div>
+</div>
 
+<div class="grid-cols-1" style="margin-top: 1.5rem;">
     <!-- Subscription Management Form -->
     <div>
         <div class="card">
@@ -166,6 +321,7 @@
             </div>
         </div>
     </div>
+</div>
 
     <!-- Payout Logs -->
     <div style="grid-column: span 2;">
@@ -281,21 +437,71 @@
 
 @section('scripts')
 <script>
+    function adjustPayoutMethodFields(method) {
+        var bankGroup = document.getElementById('bankFieldsGroup');
+        var mobileGroup = document.getElementById('mobileFieldsGroup');
+        var paypalGroup = document.getElementById('paypalFieldsGroup');
+        var numLabel = document.getElementById('settingAccountNumLabel');
+
+        if (bankGroup) bankGroup.style.display = (method === 'bank_transfer') ? 'grid' : 'none';
+        if (mobileGroup) mobileGroup.style.display = (method === 'mobile_money') ? 'block' : 'none';
+        if (paypalGroup) paypalGroup.style.display = (method === 'paypal') ? 'block' : 'none';
+
+        if (numLabel) {
+            if (method === 'bank_transfer') numLabel.textContent = 'Bank Account Number / IBAN';
+            else if (method === 'mobile_money') numLabel.textContent = 'Subscriber Mobile Phone Number';
+            else if (method === 'paypal') numLabel.textContent = 'Account ID / Reference';
+            else if (method === 'bank_card') numLabel.textContent = '16-Digit Card Number';
+        }
+    }
+
+    function populateSavedPayoutAccount() {
+        @if($payoutAccount)
+            var savedMethod = "{{ $payoutAccount['payout_method'] ?? 'bank_transfer' }}";
+            var methodSelect = document.getElementById('payment_method');
+            if (methodSelect) {
+                methodSelect.value = savedMethod;
+                toggleDetailsPlaceholder();
+            }
+
+            var textarea = document.getElementById('payment_details');
+            if (textarea) {
+                var details = "Holder: {{ $payoutAccount['account_name'] ?? '' }}\nAccount/Phone: {{ $payoutAccount['account_number'] ?? '' }}";
+                @if(!empty($payoutAccount['bank_name']))
+                    details += "\nBank: {{ $payoutAccount['bank_name'] }}";
+                @endif
+                @if(!empty($payoutAccount['routing_number']))
+                    details += "\nSWIFT/Routing: {{ $payoutAccount['routing_number'] }}";
+                @endif
+                @if(!empty($payoutAccount['mobile_network']))
+                    details += "\nNetwork: {{ $payoutAccount['mobile_network'] }}";
+                @endif
+                @if(!empty($payoutAccount['paypal_email']))
+                    details += "\nPayPal: {{ $payoutAccount['paypal_email'] }}";
+                @endif
+                textarea.value = details;
+                textarea.focus();
+            }
+        @endif
+    }
+
     function toggleDetailsPlaceholder() {
-        var method = document.getElementById('payment_method').value;
+        var method = document.getElementById('payment_method');
+        if (!method) return;
+        var methodVal = method.value;
         var label = document.getElementById('detailsLabel');
         var textarea = document.getElementById('payment_details');
 
-        if (method === 'bank_transfer') {
+        if (methodVal === 'bank_transfer') {
             label.textContent = 'Bank Transfer Details';
             textarea.placeholder = 'Provide bank name, swift code, routing number, account number, and account holder name.';
-        } else if (method === 'paypal') {
+        } else if (methodVal === 'paypal') {
             label.textContent = 'PayPal Email Address';
             textarea.placeholder = 'Provide your primary registered PayPal email address.';
-        } else if (method === 'mobile_money') {
+        } else if (methodVal === 'mobile_money') {
             label.textContent = 'Mobile Money Details';
             textarea.placeholder = 'Provide mobile carrier network, subscriber phone number, and account name.';
-        } else if (method === 'bank_card') {
+        } else if (methodVal === 'bank_card') {
             label.textContent = 'Visa / Mastercard Payout Details';
             textarea.placeholder = 'Provide full cardholder name, card number, and expiration date.';
         }

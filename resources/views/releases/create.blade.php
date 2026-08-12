@@ -15,22 +15,28 @@
     <div class="card-body">
         <!-- Progress Steps -->
         <div class="wizard-steps">
-            <div class="wizard-step active" id="stepIndicator1">
+            <div class="wizard-step active" id="stepIndicator1" onclick="handleStepClick(1)">
                 <span class="step-number">1</span>
                 <span class="step-label">Release Details</span>
             </div>
-            <div class="wizard-step" id="stepIndicator2">
+            <div class="wizard-step" id="stepIndicator2" onclick="handleStepClick(2)">
                 <span class="step-number">2</span>
                 <span class="step-label">Artwork & Release</span>
             </div>
-            <div class="wizard-step" id="stepIndicator3">
+            <div class="wizard-step" id="stepIndicator3" onclick="handleStepClick(3)">
                 <span class="step-number">3</span>
                 <span class="step-label">Upload Tracks</span>
             </div>
-            <div class="wizard-step" id="stepIndicator4">
+            <div class="wizard-step" id="stepIndicator4" onclick="handleStepClick(4)">
                 <span class="step-number">4</span>
                 <span class="step-label">Select Platforms</span>
             </div>
+        </div>
+
+        <!-- Validation Alert Banner -->
+        <div id="wizardAlertBox" class="alert alert-danger animate-fade-up" style="display: none; margin-bottom: 1.5rem;">
+            <i class="fa-solid fa-circle-exclamation" style="font-size: 1.2rem;"></i>
+            <span id="wizardAlertMessage" style="font-weight: 500;"></span>
         </div>
 
         <form id="distributionForm" action="{{ route('releases.store') }}" method="POST" enctype="multipart/form-data">
@@ -278,57 +284,310 @@
     var currentStep = 1;
     var trackCount = 1;
 
-    function goToStep(step) {
-        // Simple form validation per step
-        if (step > currentStep) {
-            if (currentStep === 1) {
-                var title = document.getElementById('title').value.trim();
-                if (!title) {
-                    alert('Please enter a release title.');
-                    return;
+    // Remove validation errors when user types or changes an input
+    document.addEventListener('DOMContentLoaded', function() {
+        var form = document.getElementById('distributionForm');
+        if (form) {
+            form.addEventListener('input', function(e) {
+                if (e.target.classList.contains('is-invalid')) {
+                    e.target.classList.remove('is-invalid');
                 }
-            } else if (currentStep === 2) {
-                var cover = document.getElementById('cover_image').files.length;
-                if (!cover) {
-                    alert('Please upload a cover artwork image.');
-                    return;
-                }
-            } else if (currentStep === 3) {
-                // Ensure song files and details are entered
-                var trackInputs = document.getElementsByName('track_title[]');
-                for (var i = 0; i < trackInputs.length; i++) {
-                    if (!trackInputs[i].value.trim()) {
-                        alert('Please fill out all track titles.');
-                        return;
+                var alertBox = document.getElementById('wizardAlertBox');
+                if (alertBox && alertBox.style.display !== 'none') {
+                    // Check if any invalid fields remain
+                    if (document.querySelectorAll('.is-invalid').length === 0) {
+                        alertBox.style.display = 'none';
                     }
+                }
+            });
+
+            form.addEventListener('change', function(e) {
+                if (e.target.classList.contains('is-invalid')) {
+                    e.target.classList.remove('is-invalid');
+                }
+            });
+
+            // Prevent form submit if any step has incomplete/invalid information
+            form.addEventListener('submit', function(e) {
+                for (var s = 1; s <= 4; s++) {
+                    if (!validateStep(s)) {
+                        e.preventDefault();
+                        if (currentStep !== s) {
+                            switchStepDisplay(s);
+                        }
+                        return false;
+                    }
+                }
+            });
+        }
+    });
+
+    function showStepError(inputElement, message) {
+        clearValidationErrors();
+        if (inputElement) {
+            inputElement.classList.add('is-invalid');
+            inputElement.focus();
+            inputElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        var alertBox = document.getElementById('wizardAlertBox');
+        var alertMsg = document.getElementById('wizardAlertMessage');
+        if (alertBox && alertMsg) {
+            alertMsg.textContent = message;
+            alertBox.style.display = 'flex';
+        }
+    }
+
+    function showStepNotification(message) {
+        clearValidationErrors();
+        var alertBox = document.getElementById('wizardAlertBox');
+        var alertMsg = document.getElementById('wizardAlertMessage');
+        if (alertBox && alertMsg) {
+            alertMsg.textContent = message;
+            alertBox.style.display = 'flex';
+            alertBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    }
+
+    function clearValidationErrors() {
+        document.querySelectorAll('.is-invalid').forEach(function(el) {
+            el.classList.remove('is-invalid');
+        });
+        var alertBox = document.getElementById('wizardAlertBox');
+        if (alertBox) {
+            alertBox.style.display = 'none';
+        }
+    }
+
+    function validateStep(stepNumber) {
+        clearValidationErrors();
+
+        // Step 1: Release Details
+        if (stepNumber === 1) {
+            var artistId = document.getElementById('artist_id');
+            if (!artistId || !artistId.value) {
+                showStepError(artistId, 'Step 1: Please select an artist profile.');
+                return false;
+            }
+
+            var title = document.getElementById('title');
+            if (!title || !title.value.trim()) {
+                showStepError(title, 'Step 1: Please enter the release title.');
+                return false;
+            }
+
+            var type = document.getElementById('type');
+            if (!type || !type.value) {
+                showStepError(type, 'Step 1: Please select a release type.');
+                return false;
+            }
+
+            var genre = document.getElementById('genre');
+            if (!genre || !genre.value) {
+                showStepError(genre, 'Step 1: Please select a primary genre.');
+                return false;
+            }
+
+            var language = document.getElementById('language');
+            if (!language || !language.value) {
+                showStepError(language, 'Step 1: Please select the lyrics language.');
+                return false;
+            }
+
+            var copyright = document.getElementById('copyright_info');
+            if (!copyright || !copyright.value.trim()) {
+                showStepError(copyright, 'Step 1: Please enter the copyright holder details.');
+                return false;
+            }
+
+            return true;
+        }
+
+        // Step 2: Cover Art & Scheduling
+        if (stepNumber === 2) {
+            var coverInput = document.getElementById('cover_image');
+            if (!coverInput || !coverInput.files || coverInput.files.length === 0) {
+                showStepError(coverInput, 'Step 2: Please upload a cover artwork image.');
+                return false;
+            }
+
+            var coverFile = coverInput.files[0];
+            var validCoverTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            if (!validCoverTypes.includes(coverFile.type) && !/\.(jpe?g|png)$/i.test(coverFile.name)) {
+                showStepError(coverInput, 'Step 2: Cover artwork must be in JPEG or PNG format.');
+                return false;
+            }
+
+            if (coverFile.size > 3 * 1024 * 1024) {
+                showStepError(coverInput, 'Step 2: Cover artwork file size exceeds the 3MB maximum limit.');
+                return false;
+            }
+
+            var schedulingType = document.getElementById('scheduling_type').value;
+            if (schedulingType === 'scheduled') {
+                var releaseDate = document.getElementById('release_date');
+                if (!releaseDate || !releaseDate.value) {
+                    showStepError(releaseDate, 'Step 2: Please select a scheduled future release date.');
+                    return false;
+                }
+                var today = new Date().toISOString().split('T')[0];
+                if (releaseDate.value < today) {
+                    showStepError(releaseDate, 'Step 2: Scheduled release date cannot be in the past.');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Step 3: Tracks & Audio Files
+        if (stepNumber === 3) {
+            var releaseType = document.getElementById('type').value;
+            var trackRows = document.querySelectorAll('.track-row');
+
+            if (trackRows.length === 0) {
+                showStepNotification('Step 3: Please add at least one audio track to the release.');
+                return false;
+            }
+
+            if (releaseType === 'single' && trackRows.length !== 1) {
+                showStepNotification('Step 3: A Single release must contain exactly 1 track.');
+                return false;
+            }
+
+            if (releaseType === 'ep' && (trackRows.length < 2 || trackRows.length > 6)) {
+                showStepNotification('Step 3: An EP must contain between 2 and 6 tracks. (Currently: ' + trackRows.length + ')');
+                return false;
+            }
+
+            if (releaseType === 'album' && trackRows.length < 6) {
+                showStepNotification('Step 3: An Album must contain at least 6 tracks. (Currently: ' + trackRows.length + ')');
+                return false;
+            }
+
+            for (var i = 0; i < trackRows.length; i++) {
+                var row = trackRows[i];
+                var trackNum = i + 1;
+
+                var titleInput = row.querySelector('input[name="track_title[]"]');
+                if (!titleInput || !titleInput.value.trim()) {
+                    showStepError(titleInput, 'Step 3: Please enter the song title for Track #' + trackNum + '.');
+                    return false;
+                }
+
+                var audioInput = row.querySelector('input[name="track_file[]"]');
+                if (!audioInput || !audioInput.files || audioInput.files.length === 0) {
+                    showStepError(audioInput, 'Step 3: Please upload an audio file for Track #' + trackNum + ' before proceeding.');
+                    return false;
+                }
+
+                var audioFile = audioInput.files[0];
+                var validAudioExt = /\.(mp3|wav|flac)$/i.test(audioFile.name);
+                if (!validAudioExt) {
+                    showStepError(audioInput, 'Step 3: Track #' + trackNum + ' audio must be MP3, WAV, or FLAC.');
+                    return false;
+                }
+
+                if (audioFile.size > 20 * 1024 * 1024) {
+                    showStepError(audioInput, 'Step 3: Track #' + trackNum + ' audio file exceeds the 20MB limit.');
+                    return false;
+                }
+
+                var composerInput = row.querySelector('input[name="track_composer[]"]');
+                if (!composerInput || !composerInput.value.trim()) {
+                    showStepError(composerInput, 'Step 3: Please enter the composer name for Track #' + trackNum + '.');
+                    return false;
+                }
+
+                var songwriterInput = row.querySelector('input[name="track_songwriter[]"]');
+                if (!songwriterInput || !songwriterInput.value.trim()) {
+                    showStepError(songwriterInput, 'Step 3: Please enter the songwriter name for Track #' + trackNum + '.');
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        // Step 4: Digital Stores
+        if (stepNumber === 4) {
+            var selectedStores = document.querySelectorAll('.store-checkbox:checked');
+            if (selectedStores.length === 0) {
+                showStepNotification('Step 4: Please select at least one digital platform or store to distribute your music.');
+                return false;
+            }
+            return true;
+        }
+
+        return true;
+    }
+
+    function handleStepClick(targetStep) {
+        goToStep(targetStep);
+    }
+
+    function goToStep(targetStep) {
+        if (targetStep === currentStep) return;
+
+        // If moving forward, validate all preceding steps sequentially
+        if (targetStep > currentStep) {
+            for (var s = currentStep; s < targetStep; s++) {
+                if (!validateStep(s)) {
+                    if (currentStep !== s) {
+                        switchStepDisplay(s);
+                    }
+                    return;
                 }
             }
         }
 
-        // Hide current section
+        // If validation passed or moving backward, switch display
+        clearValidationErrors();
+        switchStepDisplay(targetStep);
+    }
+
+    function switchStepDisplay(targetStep) {
         document.getElementById('stepSection' + currentStep).style.display = 'none';
-        document.getElementById('stepIndicator' + currentStep).classList.remove('active');
-        if (step < currentStep) {
-            document.getElementById('stepIndicator' + currentStep).classList.remove('completed');
-        } else {
-            document.getElementById('stepIndicator' + currentStep).classList.add('completed');
+
+        currentStep = targetStep;
+        document.getElementById('stepSection' + currentStep).style.display = 'block';
+
+        // Update step indicators
+        for (var i = 1; i <= 4; i++) {
+            var indicator = document.getElementById('stepIndicator' + i);
+            if (indicator) {
+                if (i < currentStep) {
+                    indicator.classList.remove('active');
+                    indicator.classList.add('completed');
+                } else if (i === currentStep) {
+                    indicator.classList.add('active');
+                    indicator.classList.remove('completed');
+                } else {
+                    indicator.classList.remove('active', 'completed');
+                }
+            }
         }
 
-        // Show next section
-        currentStep = step;
-        document.getElementById('stepSection' + currentStep).style.display = 'block';
-        document.getElementById('stepIndicator' + currentStep).classList.add('active');
-        document.getElementById('stepIndicator' + currentStep).classList.remove('completed');
+        window.scrollTo({ top: document.querySelector('.card').offsetTop - 30, behavior: 'smooth' });
     }
 
     function previewArtwork(input) {
         var preview = document.getElementById('artworkPreview');
         if (input.files && input.files[0]) {
+            var file = input.files[0];
+            if (file.size > 3 * 1024 * 1024) {
+                showStepError(input, 'Cover artwork file exceeds 3MB. Please choose a smaller file.');
+                input.value = '';
+                preview.innerHTML = '<i class="fa-regular fa-image" style="font-size: 3rem; color: var(--text-muted);"></i>';
+                return;
+            }
             var reader = new FileReader();
             reader.onload = function(e) {
-                preview.innerHTML = '<img src="' + e.target.result + '" class="artwork-img">';
+                preview.innerHTML = '<img src="' + e.target.result + '" class="artwork-img" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md);">';
             }
-            reader.readAsDataURL(input.files[0]);
+            reader.readAsDataURL(file);
+            input.classList.remove('is-invalid');
+            var alertBox = document.getElementById('wizardAlertBox');
+            if (alertBox) alertBox.style.display = 'none';
         } else {
             preview.innerHTML = '<i class="fa-regular fa-image" style="font-size: 3rem; color: var(--text-muted);"></i>';
         }
@@ -344,6 +603,7 @@
         } else {
             dateGroup.style.display = 'none';
             dateInput.required = false;
+            dateInput.classList.remove('is-invalid');
         }
     }
 
@@ -351,6 +611,10 @@
         var checkbox = card.querySelector('.store-checkbox');
         checkbox.checked = !checkbox.checked;
         card.classList.toggle('selected', checkbox.checked);
+        var alertBox = document.getElementById('wizardAlertBox');
+        if (alertBox && document.querySelectorAll('.store-checkbox:checked').length > 0) {
+            alertBox.style.display = 'none';
+        }
     }
 
     function selectAllStores(select) {
@@ -360,6 +624,10 @@
             checkbox.checked = select;
             card.classList.toggle('selected', select);
         });
+        var alertBox = document.getElementById('wizardAlertBox');
+        if (alertBox && select) {
+            alertBox.style.display = 'none';
+        }
     }
 
     function adjustTrackLimits() {
@@ -367,13 +635,11 @@
         var addBtn = document.getElementById('addTrackBtn');
         
         if (type === 'single') {
-            // Remove extra tracks, only keep the first one
             var rows = document.querySelectorAll('.track-row');
             for (var i = 1; i < rows.length; i++) {
                 rows[i].remove();
             }
             addBtn.style.display = 'none';
-            trackCount = 1;
             updateTrackLabels();
         } else {
             addBtn.style.display = 'inline-flex';
@@ -385,7 +651,7 @@
         var rows = document.querySelectorAll('.track-row');
         
         if (type === 'ep' && rows.length >= 6) {
-            alert('An EP cannot have more than 6 tracks. Please upgrade release type to Album.');
+            showStepNotification('An EP cannot have more than 6 tracks. To add more tracks, change Release Type to Album in Step 1.');
             return;
         }
 
@@ -408,7 +674,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Audio File</label>
-                            <input type="file" name="track_file[]" class="form-input" accept="audio/mp3,audio/wav,audio/flac" required>
+                            <input type="file" name="track_file[]" class="form-input track-audio-input" accept="audio/mp3,audio/wav,audio/flac" required>
                             <small style="color: var(--text-muted); font-size: 0.75rem;">Supported Formats: MP3, WAV, FLAC (Max 20MB)</small>
                         </div>
                     </div>
@@ -448,12 +714,11 @@
             label.textContent = 'Track #' + (index + 1);
         });
 
-        // Toggle delete button visibility based on total rows
         var deleteBtns = document.querySelectorAll('.delete-track-btn');
         if (labels.length <= 1) {
-            deleteBtns.forEach(btn => btn.style.display = 'none');
+            deleteBtns.forEach(function(btn) { btn.style.display = 'none'; });
         } else {
-            deleteBtns.forEach(btn => btn.style.display = 'block');
+            deleteBtns.forEach(function(btn) { btn.style.display = 'block'; });
         }
     }
 </script>

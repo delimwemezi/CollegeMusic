@@ -71,6 +71,7 @@ Route::middleware(['auth'])->group(function () {
     // Finance & Royalties (FR21-FR25)
     Route::get('/finance', [\App\Http\Controllers\PaymentController::class, 'financeIndex'])->name('finance');
     Route::post('/finance/withdraw', [\App\Http\Controllers\PaymentController::class, 'requestWithdrawal'])->name('finance.withdraw');
+    Route::post('/finance/payout-account', [\App\Http\Controllers\PaymentController::class, 'updatePayoutAccount'])->name('finance.payout_account');
     Route::get('/finance/invoice/{payment}', [\App\Http\Controllers\PaymentController::class, 'viewInvoice'])->name('finance.invoice');
     Route::get('/finance/withdrawal/invoice/{withdrawal}', [\App\Http\Controllers\PaymentController::class, 'viewWithdrawalInvoice'])->name('finance.withdrawal.invoice');
     Route::post('/finance/subscribe', [\App\Http\Controllers\PaymentController::class, 'subscribePremium'])->name('finance.subscribe');
@@ -96,6 +97,7 @@ Route::middleware(['auth'])->group(function () {
         // Admin - Payments & Withdrawals
         Route::get('/admin/payments', [\App\Http\Controllers\AdminController::class, 'payments'])->name('admin.payments');
         Route::post('/admin/withdrawals/{withdrawal}/status', [\App\Http\Controllers\AdminController::class, 'updateWithdrawalStatus'])->name('admin.withdrawals.status');
+        Route::post('/admin/platform-payout-account', [\App\Http\Controllers\AdminController::class, 'updatePlatformPayoutAccount'])->name('admin.platform_payout_account');
         
         // Admin - System Monitoring & Logs
         Route::get('/admin/logs', [\App\Http\Controllers\AdminController::class, 'logs'])->name('admin.logs');

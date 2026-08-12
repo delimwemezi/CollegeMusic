@@ -9,9 +9,11 @@ use App\Models\ReleaseStore;
 use App\Models\Payment;
 use App\Models\Withdrawal;
 use App\Models\AuditLog;
+use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -196,7 +198,98 @@ class AdminController extends Controller
     {
         $withdrawals = Withdrawal::with('user')->orderBy('created_at', 'desc')->paginate(15);
         $payments = Payment::with('user', 'release')->orderBy('created_at', 'desc')->paginate(15);
-        return view('admin.payments', compact('withdrawals', 'payments'));
+        
+        // Load active platform receiving payout account
+        $platformPayoutAccount = SystemSetting::get('platform_payout_account', [
+            'payout_method' => 'bank_transfer',
+            'bank_name' => 'JPMorgan Chase Bank, N.A.',
+            'account_number' => '987654321098',
+            'account_name' => 'CollegeMusic Global Distribution LLC',
+            'routing_swift' => 'CHASUS33XXX',
+            'mobile_network' => null,
+            'paypal_email' => 'finance@collegemusic.io',
+            'currency' => 'USD',
+            'notes' => 'Official platform treasury settlement account for receiving catalog revenues and fee distributions.',
+            'updated_by_name' => 'System Initializer',
+            'updated_by_email' => 'admin@collegemusic.io',
+            'updated_at' => now()->toDateTimeString(),
+            'updated_ip' => '127.0.0.1',
+        ]);
+
+        // Load security audit logs for platform payout account modifications
+        $payoutSecurityLogs = AuditLog::with('user')
+            ->where('action', 'admin_platform_payout_account_changed')
+            ->orderBy('created_at', 'desc')
+            ->take(15)
+            ->get();
+
+        return view('admin.payments', compact('withdrawals', 'payments', 'platformPayoutAccount', 'payoutSecurityLogs'));
+    }
+
+    public function updatePlatformPayoutAccount(Request $request)
+    {
+        // High-Security Authentication Check: require verifying current admin's password
+        $request->validate([
+            'admin_password' => 'required|string',
+            'payout_method' => 'required|string|in:bank_transfer,mobile_money,paypal,bank_card',
+            'account_number' => 'required|string|max:100',
+            'account_name' => 'required|string|max:255',
+            'bank_name' => 'nullable|string|max:255',
+            'routing_swift' => 'nullable|string|max:100',
+            'mobile_network' => 'nullable|string|max:100',
+            'paypal_email' => 'nullable|email|max:255',
+            'currency' => 'required|string|max:10',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $currentAdmin = Auth::user();
+
+        if (!Hash::check($request->admin_password, $currentAdmin->password)) {
+            AuditLog::create([
+                'user_id' => $currentAdmin->id,
+                'action' => 'admin_platform_payout_account_failed_auth',
+                'description' => "SECURITY WARNING: Failed attempt to modify platform payout account by {$currentAdmin->email} (Incorrect administrator password entered).",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            return back()->with('error', 'Security Authentication Failed: The administrator password you entered is incorrect.');
+        }
+
+        $accountData = [
+            'payout_method' => $request->payout_method,
+            'account_number' => $request->account_number,
+            'account_name' => $request->account_name,
+            'bank_name' => $request->bank_name,
+            'routing_swift' => $request->routing_swift,
+            'mobile_network' => $request->mobile_network,
+            'paypal_email' => $request->paypal_email,
+            'currency' => strtoupper($request->currency),
+            'notes' => $request->notes,
+            'updated_by_id' => $currentAdmin->id,
+            'updated_by_name' => $currentAdmin->name,
+            'updated_by_email' => $currentAdmin->email,
+            'updated_at' => now()->toDateTimeString(),
+            'updated_ip' => $request->ip(),
+        ];
+
+        SystemSetting::set('platform_payout_account', $accountData, $currentAdmin->id);
+
+        // Broadcast high-priority security notifications to ALL System Administrators
+        $allAdmins = User::where('role', 'admin')->get();
+        $broadcastMessage = "SECURITY ALERT: Platform payout receiving account was changed by {$currentAdmin->name} ({$currentAdmin->email}). New Account: " . strtoupper(str_replace('_', ' ', $request->payout_method)) . " - " . ($request->bank_name ? $request->bank_name . ' ' : '') . "Acc #" . $request->account_number . " ({$request->account_name}, {$request->currency}). Timestamp: " . now()->format('Y-m-d H:i:s') . " from IP: " . $request->ip();
+
+        foreach ($allAdmins as $admin) {
+            AuditLog::create([
+                'user_id' => $admin->id,
+                'action' => 'admin_platform_payout_account_changed',
+                'description' => $broadcastMessage,
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+        }
+
+        return back()->with('success', 'Platform payout receiving account has been updated with high-level security verification. Critical broadcast notifications were dispatched to all system administrators.');
     }
 
     public function updateWithdrawalStatus(Request $request, Withdrawal $withdrawal)
@@ -215,7 +308,7 @@ class AdminController extends Controller
             AuditLog::create([
                 'user_id' => $withdrawal->user_id,
                 'action' => 'withdrawal_completed',
-                'description' => "Your withdrawal request for ${$withdrawal->amount} was approved and processed!",
+                'description' => "Your withdrawal request for $" . $withdrawal->amount . " was approved and processed!",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -223,7 +316,7 @@ class AdminController extends Controller
             AuditLog::create([
                 'user_id' => Auth::id(),
                 'action' => 'admin_approve_withdrawal',
-                'description' => "Approved withdrawal request #{$withdrawal->id} of ${$withdrawal->amount} for user {$withdrawal->user->email}.",
+                'description' => "Approved withdrawal request #{$withdrawal->id} of $" . $withdrawal->amount . " for user {$withdrawal->user->email}.",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -240,7 +333,7 @@ class AdminController extends Controller
             AuditLog::create([
                 'user_id' => $withdrawal->user_id,
                 'action' => 'withdrawal_rejected',
-                'description' => "Your withdrawal request for ${$withdrawal->amount} was rejected. Reason: {$request->rejection_reason}",
+                'description' => "Your withdrawal request for $" . $withdrawal->amount . " was rejected. Reason: {$request->rejection_reason}",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
