@@ -83,6 +83,12 @@
             backdrop-filter: blur(8px);
             box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
         }
+
+        /* Prevent duplicate native browser password reveal eye icons */
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+        }
     </style>
 </head>
 <body>
