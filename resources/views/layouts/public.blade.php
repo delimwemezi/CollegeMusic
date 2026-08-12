@@ -406,14 +406,14 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <a href="{{ url('/') }}" class="footer-logo" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;" title="Go to Home Page">
+            <a href="{{ route('home') }}" onclick="if(window.location.pathname==='/' || window.location.pathname.endsWith('/')){ window.scrollTo({top:0, behavior:'smooth'}); }" class="footer-logo" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;" title="Go to Home Page">
                 <i class="fa-solid fa-music" style="color: var(--primary);"></i> CollegeMusic
             </a>
             <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.75rem;">
                 {{ __('messages.footer_tagline') }}
             </p>
             <div style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.85rem;">
-                <a href="{{ url('/') }}" style="color: var(--primary); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                <a href="{{ route('home') }}" onclick="if(window.location.pathname==='/' || window.location.pathname.endsWith('/')){ window.scrollTo({top:0, behavior:'smooth'}); }" style="color: var(--primary); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
                     <i class="fa-solid fa-house"></i> Home Page
                 </a>
                 <span style="color: var(--border-color);">|</span>

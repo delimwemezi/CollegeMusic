@@ -1180,12 +1180,12 @@
         }
     </style>
 </head>
-<body>
+<body id="top">
 
     <!-- Sticky Navigation -->
     <nav class="navbar">
         <div class="container navbar-content">
-            <a href="{{ route('home') }}" class="logo">
+            <a href="{{ route('home') }}" onclick="if(window.location.pathname==='/' || window.location.pathname.endsWith('/')){ window.scrollTo({top:0, behavior:'smooth'}); }" class="logo">
                 <i class="fa-solid fa-music"></i> <span class="logo-text">CollegeMusic</span>
             </a>
             <ul class="nav-links">
@@ -1536,7 +1536,7 @@
         <div class="container">
             <div class="footer-grid">
                 <div>
-                    <a href="{{ url('/') }}" class="footer-logo" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;" title="Go to Home Page">
+                    <a href="{{ route('home') }}" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" class="footer-logo" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;" title="Go to Top / Home Page">
                         <i class="fa-solid fa-music" style="color: var(--primary);"></i> CollegeMusic
                     </a>
                     <p class="footer-desc">{{ __('messages.footer_tagline') }}</p>
@@ -1551,7 +1551,7 @@
                 <div>
                     <h4 class="footer-col-title">Navigation & Shortcuts</h4>
                     <ul class="footer-menu">
-                        <li><a href="{{ url('/') }}" class="footer-menu-link" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-house" style="margin-right: 0.35rem;"></i> Home Page</a></li>
+                        <li><a href="{{ route('home') }}" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" class="footer-menu-link" style="color: var(--primary); font-weight: 600;"><i class="fa-solid fa-house" style="margin-right: 0.35rem;"></i> Home Page</a></li>
                         <li><a href="{{ route('dashboard') }}" class="footer-menu-link"><i class="fa-solid fa-gauge-high" style="margin-right: 0.35rem;"></i> App Dashboard</a></li>
                         <li><a href="#features" class="footer-menu-link"><i class="fa-solid fa-layer-group" style="margin-right: 0.35rem;"></i> Platform Features</a></li>
                         <li><a href="#pricing" class="footer-menu-link"><i class="fa-solid fa-tags" style="margin-right: 0.35rem;"></i> Distribution Pricing</a></li>
@@ -1582,10 +1582,10 @@
             <div class="footer-bottom" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; padding-top: 1.5rem; border-top: 1px solid var(--border-color);">
                 <span>&copy; {{ date('Y') }} CollegeMusic Inc. {{ __('messages.all_rights_reserved') }} Made for independent music artists & record labels.</span>
                 <div style="display: flex; align-items: center; gap: 1.25rem;">
-                    <a href="{{ url('/') }}" style="color: var(--primary); text-decoration: none; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <a href="{{ route('home') }}" onclick="window.scrollTo({top: 0, behavior: 'smooth'});" style="color: var(--primary); text-decoration: none; font-size: 0.8rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.35rem;" title="Go to Home Page">
                         <i class="fa-solid fa-house"></i> Home
                     </a>
-                    <a href="javascript:window.scrollTo({top:0, behavior:'smooth'})" style="color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <a href="javascript:void(0)" onclick="window.scrollTo({top:0, behavior:'smooth'})" style="color: var(--text-secondary); text-decoration: none; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 0.35rem;">
                         <i class="fa-solid fa-arrow-up"></i> Back to Top
                     </a>
                 </div>
