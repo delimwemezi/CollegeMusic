@@ -283,6 +283,34 @@
                 @endif
 
                 @yield('content')
+
+                <!-- Dashboard Footer with Home Shortcut -->
+                <footer class="app-dashboard-footer" style="margin-top: 3.5rem; padding: 1.5rem 0 1rem; border-top: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); flex-wrap: wrap; gap: 1rem;">
+                    <div>
+                        <span>&copy; {{ date('Y') }} CollegeMusic Global Music Distribution. All rights reserved.</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 1.25rem;">
+                        <a href="{{ url('/') }}" style="color: var(--primary); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" title="Go to CollegeMusic Home Page">
+                            <i class="fa-solid fa-house"></i> Home Page
+                        </a>
+                        <span style="color: var(--border-color);">•</span>
+                        <a href="{{ route('dashboard') }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <i class="fa-solid fa-gauge-high"></i> Dashboard
+                        </a>
+                        <span style="color: var(--border-color);">•</span>
+                        <a href="{{ route('catalogue') }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <i class="fa-solid fa-compact-disc"></i> Catalogue
+                        </a>
+                        <span style="color: var(--border-color);">•</span>
+                        <a href="{{ route('profile.edit') }}" style="color: var(--text-secondary); text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                            <i class="fa-solid fa-user-gear"></i> Settings
+                        </a>
+                        <span style="color: var(--border-color);">•</span>
+                        <a href="javascript:window.scrollTo({top:0, behavior:'smooth'})" style="color: var(--text-muted); text-decoration: none; display: inline-flex; align-items: center; gap: 0.25rem;">
+                            <i class="fa-solid fa-arrow-up"></i> Top
+                        </a>
+                    </div>
+                </footer>
             </div>
         </main>
     </div>

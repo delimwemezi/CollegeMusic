@@ -406,12 +406,23 @@
     <!-- Footer -->
     <footer>
         <div class="container">
-            <div class="footer-logo">
+            <a href="{{ url('/') }}" class="footer-logo" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; gap: 0.5rem;" title="Go to Home Page">
                 <i class="fa-solid fa-music" style="color: var(--primary);"></i> CollegeMusic
-            </div>
-            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.5rem;">
+            </a>
+            <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0.75rem;">
                 {{ __('messages.footer_tagline') }}
             </p>
+            <div style="display: flex; justify-content: center; align-items: center; gap: 1.5rem; margin-bottom: 1rem; font-size: 0.85rem;">
+                <a href="{{ url('/') }}" style="color: var(--primary); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;">
+                    <i class="fa-solid fa-house"></i> Home Page
+                </a>
+                <span style="color: var(--border-color);">|</span>
+                <a href="{{ route('login') }}" style="color: var(--text-secondary); text-decoration: none;">Sign In</a>
+                <span style="color: var(--border-color);">|</span>
+                <a href="{{ route('register') }}" style="color: var(--text-secondary); text-decoration: none;">Create Account</a>
+                <span style="color: var(--border-color);">|</span>
+                <a href="{{ route('dashboard') }}" style="color: var(--text-secondary); text-decoration: none;">Dashboard</a>
+            </div>
             <p style="color: var(--text-muted); font-size: 0.75rem;">
                 &copy; {{ date('Y') }} CollegeMusic. {{ __('messages.all_rights_reserved') }}
             </p>
