@@ -1564,7 +1564,7 @@
                         <li><a href="{{ route('releases.create') }}" class="footer-menu-link">Singles Upload</a></li>
                         <li><a href="{{ route('releases.create') }}" class="footer-menu-link">Albums / EPs</a></li>
                         <li><a href="{{ route('catalogue') }}" class="footer-menu-link">Catalogue Overview</a></li>
-                        <li><a href="{{ route('finance.index') }}" class="footer-menu-link">Royalties & Earnings</a></li>
+                        <li><a href="{{ route('finance') }}" class="footer-menu-link">Royalties & Earnings</a></li>
                     </ul>
                 </div>
 
