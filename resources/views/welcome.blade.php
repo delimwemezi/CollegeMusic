@@ -105,20 +105,36 @@
             -webkit-text-fill-color: transparent;
         }
 
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* Smooth scroll margin offsets for sticky navbar */
+        #top, #features, #platforms, #pricing {
+            scroll-margin-top: 96px;
+        }
+
         /* Sticky Navigation */
         .navbar {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            height: 80px;
-            background-color: rgba(11, 15, 25, 0.7);
-            backdrop-filter: blur(12px);
+            height: 76px;
+            background-color: rgba(11, 15, 25, 0.8);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
             border-bottom: 1px solid var(--border-color);
             z-index: 1000;
             display: flex;
             align-items: center;
-            transition: var(--transition);
+            transition: background-color 0.3s ease, border-color 0.3s ease, height 0.3s ease;
+        }
+
+        .light-theme .navbar {
+            background-color: rgba(255, 255, 255, 0.9);
+            border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
         }
 
         .navbar-content {
@@ -126,16 +142,29 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            gap: 1.5rem;
         }
 
         .logo {
             font-family: var(--font-heading);
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             font-weight: 800;
             display: flex;
             align-items: center;
             gap: 0.6rem;
             color: #fff;
+            letter-spacing: -0.02em;
+            transition: color 0.3s ease, transform 0.2s ease;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .logo:hover {
+            transform: scale(1.02);
+        }
+
+        .light-theme .logo {
+            color: #0f172a;
         }
 
         .logo i {
@@ -143,27 +172,90 @@
             animation: float 3s ease-in-out infinite;
         }
 
+        /* Modern Centered Floating Glass Pill Dock */
         .nav-links {
             display: flex;
-            gap: 2.25rem;
+            align-items: center;
+            gap: 0.25rem;
             list-style: none;
+            background: rgba(255, 255, 255, 0.035);
+            border: 1px solid var(--border-color);
+            padding: 0.28rem 0.35rem;
+            border-radius: var(--radius-full);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        }
+
+        .light-theme .nav-links {
+            background: rgba(15, 23, 42, 0.03);
+            border-color: rgba(15, 23, 42, 0.07);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
         }
 
         .nav-link {
-            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            padding: 0.42rem 0.95rem;
+            border-radius: var(--radius-full);
+            font-size: 0.88rem;
             font-weight: 500;
             color: var(--text-secondary);
-            transition: var(--transition);
+            transition: all 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+            text-decoration: none;
+            white-space: nowrap;
         }
 
-        .nav-link:hover, .nav-link.active {
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.06);
+        }
+
+        .light-theme .nav-link:hover {
+            background: rgba(15, 23, 42, 0.05);
+            color: var(--text-primary);
+        }
+
+        .nav-link.active {
+            color: #ffffff !important;
+            background: linear-gradient(135deg, var(--primary), #4f46e5) !important;
+            font-weight: 600;
+            box-shadow: 0 2px 12px rgba(99, 102, 241, 0.35);
+        }
+
+        .nav-link-explore {
+            color: var(--primary) !important;
+            font-weight: 600;
+        }
+
+        .nav-link-explore:hover {
+            background: rgba(99, 102, 241, 0.12) !important;
+        }
+
+        .nav-signin-link {
+            font-weight: 600;
+            padding: 0.45rem 0.85rem;
+            border-radius: var(--radius-full);
+            color: var(--text-secondary);
+            font-size: 0.88rem;
+            transition: all 0.2s ease;
+        }
+
+        .nav-signin-link:hover {
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .light-theme .nav-signin-link:hover {
+            background: rgba(15, 23, 42, 0.04);
             color: var(--text-primary);
         }
 
         .nav-actions {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.85rem;
+            flex-shrink: 0;
         }
 
         /* Hero Section */
@@ -1104,26 +1196,6 @@
             transition: opacity 0.3s ease, transform 0.3s ease;
         }
 
-        /* Active Navigation Link Styling */
-        .nav-link.active, .nav-view-btn.active {
-            color: var(--primary) !important;
-            font-weight: 700;
-            position: relative;
-        }
-
-        .nav-link.active::after, .nav-view-btn.active::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 20px;
-            height: 3px;
-            background: linear-gradient(90deg, var(--primary), #818cf8);
-            border-radius: var(--radius-full);
-            box-shadow: 0 0 10px var(--primary);
-        }
-
         /* Mobile View Switcher Pill Bar */
         .mobile-view-tabs-container {
             display: none;
@@ -1183,95 +1255,65 @@
             .mobile-view-tabs-container {
                 display: block;
             }
-        }
 
-        /* Contextual View Header Banner when isolated */
-        .view-context-banner {
-            display: none;
-            margin-bottom: 3rem;
-            background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(17, 24, 39, 0.6));
-            border: 1px solid rgba(99, 102, 241, 0.3);
-            border-radius: var(--radius-lg);
-            padding: 1.25rem 2rem;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 1rem;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            animation: viewFadeIn 0.35s ease forwards;
-        }
+            /* Contextual View Header Banner when isolated on mobile */
+            .view-context-banner {
+                display: none;
+                margin-bottom: 3rem;
+                background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(17, 24, 39, 0.6));
+                border: 1px solid rgba(99, 102, 241, 0.3);
+                border-radius: var(--radius-lg);
+                padding: 1.25rem 2rem;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+                gap: 1rem;
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                animation: viewFadeIn 0.35s ease forwards;
+            }
 
-        body:not([data-view="all"]) .view-context-banner {
-            display: flex;
-        }
+            body:not([data-view="all"]) .view-context-banner {
+                display: flex;
+            }
 
-        .view-context-info {
-            display: flex;
-            align-items: center;
-            gap: 0.85rem;
-        }
+            /* VIEW ISOLATION LOGIC: Strictly mobile-only */
+            body[data-view="features"] .landing-section:not([data-section="features"]),
+            body[data-view="features"] .hero,
+            body[data-view="features"] .platforms-section,
+            body[data-view="features"] .pricing,
+            body[data-view="features"] .testimonials,
+            body[data-view="features"] .cta-section {
+                display: none !important;
+            }
 
-        .view-context-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.4rem;
-            padding: 0.35rem 0.85rem;
-            border-radius: var(--radius-full);
-            background: var(--primary);
-            color: #fff;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
+            body[data-view="platforms"] .landing-section:not([data-section="platforms"]),
+            body[data-view="platforms"] .hero,
+            body[data-view="platforms"] .features,
+            body[data-view="platforms"] .steps-section,
+            body[data-view="platforms"] .pricing,
+            body[data-view="platforms"] .testimonials,
+            body[data-view="platforms"] .cta-section {
+                display: none !important;
+            }
 
-        .view-context-title {
-            font-family: var(--font-heading);
-            font-size: 1.15rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin: 0;
-        }
+            body[data-view="pricing"] .landing-section:not([data-section="pricing"]),
+            body[data-view="pricing"] .hero,
+            body[data-view="pricing"] .platforms-section,
+            body[data-view="pricing"] .features,
+            body[data-view="pricing"] .steps-section,
+            body[data-view="pricing"] .testimonials,
+            body[data-view="pricing"] .cta-section {
+                display: none !important;
+            }
 
-        /* =======================================================
-           VIEW ISOLATION LOGIC: Strictly display only the chosen section
-           ======================================================= */
-        body[data-view="features"] .landing-section:not([data-section="features"]),
-        body[data-view="features"] .hero,
-        body[data-view="features"] .platforms-section,
-        body[data-view="features"] .pricing,
-        body[data-view="features"] .testimonials,
-        body[data-view="features"] .cta-section {
-            display: none !important;
-        }
-
-        body[data-view="platforms"] .landing-section:not([data-section="platforms"]),
-        body[data-view="platforms"] .hero,
-        body[data-view="platforms"] .features,
-        body[data-view="platforms"] .steps-section,
-        body[data-view="platforms"] .pricing,
-        body[data-view="platforms"] .testimonials,
-        body[data-view="platforms"] .cta-section {
-            display: none !important;
-        }
-
-        body[data-view="pricing"] .landing-section:not([data-section="pricing"]),
-        body[data-view="pricing"] .hero,
-        body[data-view="pricing"] .platforms-section,
-        body[data-view="pricing"] .features,
-        body[data-view="pricing"] .steps-section,
-        body[data-view="pricing"] .testimonials,
-        body[data-view="pricing"] .cta-section {
-            display: none !important;
-        }
-
-        /* Active Isolated Section Spacing & Transitions */
-        body:not([data-view="all"]) .features,
-        body:not([data-view="all"]) .platforms-section,
-        body:not([data-view="all"]) .pricing {
-            padding-top: 140px;
-            min-height: 85vh;
-            animation: viewFadeIn 0.35s ease forwards;
+            /* Active Isolated Section Spacing */
+            body:not([data-view="all"]) .features,
+            body:not([data-view="all"]) .platforms-section,
+            body:not([data-view="all"]) .pricing {
+                padding-top: 140px;
+                min-height: 85vh;
+                animation: viewFadeIn 0.35s ease forwards;
+            }
         }
 
         @keyframes viewFadeIn {
@@ -1357,37 +1399,37 @@
     <!-- Sticky Navigation -->
     <nav class="navbar">
         <div class="container navbar-content">
-            <a href="javascript:void(0)" onclick="switchViewMode('all')" class="logo" title="CollegeMusic Home">
+            <a href="#top" class="logo" title="CollegeMusic Home">
                 <i class="fa-solid fa-music"></i> <span class="logo-text">CollegeMusic</span>
             </a>
             <ul class="nav-links">
                 <li>
-                    <a href="javascript:void(0)" onclick="switchViewMode('all')" class="nav-link nav-view-btn active" data-view-target="all">
-                        <i class="fa-solid fa-house" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.home') ?? 'Home' }}
+                    <a href="#top" class="nav-link active" data-nav-target="top">
+                        Home
                     </a>
                 </li>
                 <li>
-                    <a href="javascript:void(0)" onclick="switchViewMode('features')" class="nav-link nav-view-btn" data-view-target="features">
-                        <i class="fa-solid fa-layer-group" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.features') }}
+                    <a href="#features" class="nav-link" data-nav-target="features">
+                        {{ __('messages.features') }}
                     </a>
                 </li>
                 <li>
-                    <a href="javascript:void(0)" onclick="switchViewMode('platforms')" class="nav-link nav-view-btn" data-view-target="platforms">
-                        <i class="fa-solid fa-tower-broadcast" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.platforms') }}
+                    <a href="#platforms" class="nav-link" data-nav-target="platforms">
+                        {{ __('messages.platforms') }}
                     </a>
                 </li>
                 <li>
-                    <a href="javascript:void(0)" onclick="switchViewMode('pricing')" class="nav-link nav-view-btn" data-view-target="pricing">
-                        <i class="fa-solid fa-tags" style="font-size: 0.8rem; margin-right: 0.25rem;"></i> {{ __('messages.pricing') }}
+                    <a href="#pricing" class="nav-link" data-nav-target="pricing">
+                        {{ __('messages.pricing') }}
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('explore') }}" class="nav-link" style="color: var(--primary); font-weight: bold;">
-                        <i class="fa-solid fa-compass"></i> {{ __('messages.explore_music') }}
+                    <a href="{{ route('explore') }}" class="nav-link nav-link-explore">
+                        {{ __('messages.explore_music') }}
                     </a>
                 </li>
             </ul>
-            <div class="nav-actions" style="display: flex; align-items: center; gap: 1rem;">
+            <div class="nav-actions">
                 <!-- Theme Switcher -->
                 <button class="theme-toggle-btn" id="themeToggle" onclick="toggleTheme(event)" aria-label="Toggle Theme" title="{{ __('messages.theme') }}">
                     <span class="theme-toggle-circle">
@@ -1403,7 +1445,7 @@
                     <div class="lang-switch-slider"></div>
                 </div>
 
-                <a href="{{ route('login') }}" class="nav-link" style="margin-right: 0.25rem; font-weight: 600;">{{ __('messages.sign_in') }}</a>
+                <a href="{{ route('login') }}" class="nav-link nav-signin-link">{{ __('messages.sign_in') }}</a>
                 <a href="{{ route('register') }}" class="btn btn-primary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">{{ __('messages.get_started') }}</a>
             </div>
         </div>
@@ -2000,12 +2042,52 @@
             }
         }
 
+        // Desktop ScrollSpy for Navbar links
+        function initScrollSpy() {
+            const sections = [
+                { id: 'top', el: document.querySelector('.hero') || document.getElementById('top') },
+                { id: 'platforms', el: document.getElementById('platforms') },
+                { id: 'features', el: document.getElementById('features') },
+                { id: 'pricing', el: document.getElementById('pricing') }
+            ];
+
+            const navLinks = document.querySelectorAll('.nav-links .nav-link[data-nav-target]');
+            if (!navLinks.length) return;
+
+            function updateActiveNav() {
+                const scrollPos = window.scrollY + 140;
+                let currentId = 'top';
+
+                sections.forEach(({ id, el }) => {
+                    if (el && scrollPos >= el.offsetTop) {
+                        currentId = id;
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('data-nav-target') === currentId) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            window.addEventListener('scroll', updateActiveNav, { passive: true });
+            updateActiveNav();
+        }
+
         window.addEventListener('hashchange', () => {
-            initViewModeFromHash();
+            if (window.innerWidth <= 968) {
+                initViewModeFromHash();
+            }
         });
 
         window.addEventListener('DOMContentLoaded', () => {
-            initViewModeFromHash();
+            if (window.innerWidth <= 968) {
+                initViewModeFromHash();
+            }
+            initScrollSpy();
         });
 
         function toggleTheme(event) {
