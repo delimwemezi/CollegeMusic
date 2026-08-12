@@ -86,6 +86,9 @@
     @endphp
 
     <div class="app-wrapper">
+        <!-- Sidebar Navigation Backdrop for Mobile Devices -->
+        <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="toggleSidebar()"></div>
+
         <!-- Sidebar Navigation -->
         <aside class="app-sidebar" id="appSidebar">
             <div class="sidebar-header">
@@ -326,7 +329,9 @@
     <script>
         function toggleSidebar() {
             var sidebar = document.getElementById('appSidebar');
-            sidebar.classList.toggle('open');
+            var backdrop = document.getElementById('sidebarBackdrop');
+            if (sidebar) sidebar.classList.toggle('open');
+            if (backdrop) backdrop.classList.toggle('active');
         }
 
         function toggleDropdown(id) {

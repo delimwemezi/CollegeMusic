@@ -11,7 +11,7 @@
             color: #1f2937;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 2rem;
+            padding: 2rem 1rem;
             line-height: 1.5;
         }
         .report-card {
@@ -21,6 +21,8 @@
             padding: 3rem;
             border-radius: 8px;
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            box-sizing: border-box;
         }
         .header {
             display: flex;
@@ -29,6 +31,7 @@
             border-bottom: 3px solid #3b82f6;
             padding-bottom: 1.5rem;
             margin-bottom: 2rem;
+            gap: 1.5rem;
         }
         .logo {
             font-size: 1.8rem;
@@ -49,8 +52,9 @@
         .summary-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 1.5rem;
+            gap: 1.25rem;
             margin-bottom: 2.5rem;
+            width: 100%;
         }
         .summary-box {
             background-color: #f9fafb;
@@ -82,15 +86,21 @@
             align-items: center;
             gap: 0.5rem;
         }
+        .table-wrap {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-bottom: 2rem;
+        }
         .table {
             width: 100%;
             border-collapse: collapse;
-            margin-bottom: 2rem;
             font-size: 0.9rem;
+            min-width: 480px;
         }
         .table th {
             background-color: #f9fafb;
-            padding: 0.5rem 0.75rem;
+            padding: 0.6rem 0.75rem;
             text-align: left;
             font-size: 0.75rem;
             text-transform: uppercase;
@@ -107,10 +117,12 @@
             justify-content: center;
             gap: 1rem;
             margin-top: 3rem;
+            flex-wrap: wrap;
         }
         .btn {
             display: inline-flex;
             align-items: center;
+            justify-content: center;
             gap: 0.5rem;
             padding: 0.75rem 1.5rem;
             border-radius: 6px;
@@ -119,16 +131,70 @@
             cursor: pointer;
             border: 1px solid transparent;
             font-size: 0.95rem;
+            transition: all 0.2s ease;
         }
         .btn-primary {
             background-color: #3b82f6;
             color: #fff;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
         }
         .btn-secondary {
             background-color: #fff;
             color: #4b5563;
             border-color: #d1d5db;
         }
+        .btn-secondary:hover {
+            background-color: #f9fafb;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem 0.5rem;
+            }
+            .report-card {
+                padding: 1.5rem;
+                border-radius: 6px;
+            }
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1.25rem;
+            }
+            .meta {
+                text-align: left;
+            }
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            .summary-value {
+                font-size: 1.4rem;
+            }
+            .btn {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 0.5rem 0.25rem;
+            }
+            .report-card {
+                padding: 1rem;
+            }
+            .logo {
+                font-size: 1.4rem;
+            }
+            .meta h2 {
+                font-size: 1.2rem;
+            }
+            .summary-box {
+                padding: 1rem;
+            }
+        }
+
         @media print {
             body {
                 background-color: #fff;
@@ -137,6 +203,7 @@
             .report-card {
                 box-shadow: none;
                 padding: 0;
+                max-width: 100%;
             }
             .btn-group {
                 display: none;
@@ -178,96 +245,102 @@
 
         <!-- Top Tracks -->
         <div class="section-title"><i class="fa-solid fa-ranking-star"></i> Top Performing Tracks</div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Rank</th>
-                    <th>Track Title</th>
-                    <th>ISRC</th>
-                    <th style="text-align: right;">Streams</th>
-                    <th style="text-align: right;">Downloads</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($topSongs as $index => $song)
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>{{ $index + 1 }}</td>
-                        <td><strong>{{ $song->title }}</strong></td>
-                        <td style="font-family: monospace;">{{ $song->isrc }}</td>
-                        <td style="text-align: right; font-weight: bold; color: #3b82f6;">{{ number_format($song->streams_count) }}</td>
-                        <td style="text-align: right;">{{ number_format($song->downloads_count) }}</td>
+                        <th>Rank</th>
+                        <th>Track Title</th>
+                        <th>ISRC</th>
+                        <th style="text-align: right;">Streams</th>
+                        <th style="text-align: right;">Downloads</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" style="text-align: center; color: #6b7280;">No tracks recorded.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse($topSongs as $index => $song)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td><strong>{{ $song->title }}</strong></td>
+                            <td style="font-family: monospace;">{{ $song->isrc }}</td>
+                            <td style="text-align: right; font-weight: bold; color: #3b82f6;">{{ number_format($song->streams_count) }}</td>
+                            <td style="text-align: right;">{{ number_format($song->downloads_count) }}</td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="5" style="text-align: center; color: #6b7280;">No tracks recorded.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         <!-- Platform Breakdown -->
         <div class="section-title"><i class="fa-solid fa-chart-pie"></i> Streaming Service Breakdown</div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Platform Target</th>
-                    <th>Platform Streams</th>
-                    <th style="text-align: right;">Platform Royalties Generated</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($platformBreakdown as $platform)
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td><strong>{{ $platform->platform }}</strong></td>
-                        <td>{{ number_format($platform->total_streams) }} streams</td>
-                        <td style="text-align: right; font-weight: bold; color: #10b981;">
-                            ${{ number_format($platform->total_revenue, 4) }}
-                        </td>
+                        <th>Platform Target</th>
+                        <th>Platform Streams</th>
+                        <th style="text-align: right;">Platform Royalties Generated</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" style="text-align: center; color: #6b7280;">No streaming platform activity logs yet.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse($platformBreakdown as $platform)
+                        <tr>
+                            <td><strong>{{ $platform->platform }}</strong></td>
+                            <td>{{ number_format($platform->total_streams) }} streams</td>
+                            <td style="text-align: right; font-weight: bold; color: #10b981;">
+                                ${{ number_format($platform->total_revenue, 4) }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #6b7280;">No streaming platform activity logs yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         <!-- Geographical Breakdown -->
         <div class="section-title"><i class="fa-solid fa-earth-africa"></i> Geographical Distribution</div>
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Listener Region</th>
-                    <th>Total Playbacks</th>
-                    <th style="text-align: right;">Royalties Generated</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($countryBreakdown as $country)
+        <div class="table-wrap">
+            <table class="table">
+                <thead>
                     <tr>
-                        <td>
-                            <strong>
-                                @if($country->country === 'US') United States
-                                @elseif($country->country === 'GB') United Kingdom
-                                @elseif($country->country === 'CA') Canada
-                                @elseif($country->country === 'NG') Nigeria
-                                @elseif($country->country === 'JP') Japan
-                                @else {{ $country->country }}
-                                @endif
-                            </strong>
-                        </td>
-                        <td>{{ number_format($country->total_streams) }} streams</td>
-                        <td style="text-align: right; font-weight: bold; color: #10b981;">
-                            ${{ number_format($country->total_revenue, 4) }}
-                        </td>
+                        <th>Listener Region</th>
+                        <th>Total Playbacks</th>
+                        <th style="text-align: right;">Royalties Generated</th>
                     </tr>
-                @empty
-                    <tr>
-                        <td colspan="3" style="text-align: center; color: #6b7280;">No audience geography logs yet.</td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @forelse($countryBreakdown as $country)
+                        <tr>
+                            <td>
+                                <strong>
+                                    @if($country->country === 'US') United States
+                                    @elseif($country->country === 'GB') United Kingdom
+                                    @elseif($country->country === 'CA') Canada
+                                    @elseif($country->country === 'NG') Nigeria
+                                    @elseif($country->country === 'JP') Japan
+                                    @else {{ $country->country }}
+                                    @endif
+                                </strong>
+                            </td>
+                            <td>{{ number_format($country->total_streams) }} streams</td>
+                            <td style="text-align: right; font-weight: bold; color: #10b981;">
+                                ${{ number_format($country->total_revenue, 4) }}
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="3" style="text-align: center; color: #6b7280;">No audience geography logs yet.</td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
 
         <div style="margin-top: 3rem; text-align: center; border-top: 1px solid #e5e7eb; padding-top: 1.5rem; font-size: 0.8rem; color: #6b7280;">
             This report represents verified distribution analytics pulled directly from the CollegeMusic ingestion database log aggregates. Confidential for account auditor.

@@ -26,9 +26,9 @@
 
 <!-- Warning Card: Verification Reminder -->
 @if($showVerificationWarning)
-    <div class="alert alert-warning" style="margin-bottom: 2rem; border-color: rgba(245, 158, 11, 0.3);">
-        <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.75rem; color: var(--warning);"></i>
-        <div style="flex: 1;">
+    <div class="alert alert-warning" style="margin-bottom: 2rem; border-color: rgba(245, 158, 11, 0.3); display: flex; align-items: center; flex-wrap: wrap; gap: 1rem;">
+        <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.75rem; color: var(--warning); flex-shrink: 0;"></i>
+        <div style="flex: 1; min-width: 200px;">
             <h4 style="font-weight: bold; margin-bottom: 0.25rem; color: var(--text-primary);">{{ __('messages.verification_warning_title') }}</h4>
             <p style="font-size: 0.85rem; color: var(--text-secondary);">
                 {{ __('messages.verification_warning_desc') }}

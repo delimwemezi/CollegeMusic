@@ -18,21 +18,21 @@
 
 <div class="grid-cols-2">
     <!-- Platform Payout Settlement Account -->
-    <div style="grid-column: span 2;">
+    <div style="grid-column: 1 / -1; width: 100%;">
         <div class="card" style="border-color: rgba(99, 102, 241, 0.3); box-shadow: 0 4px 20px rgba(99, 102, 241, 0.08);">
-            <div class="card-header" style="background: rgba(99, 102, 241, 0.04); display: flex; justify-content: space-between; align-items: center;">
-                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                    <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: var(--primary);">
+            <div class="card-header" style="background: rgba(99, 102, 241, 0.04); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem;">
+                <div style="display: flex; align-items: center; gap: 0.75rem; min-width: 0; flex: 1;">
+                    <div style="width: 38px; height: 38px; border-radius: 8px; background: rgba(99, 102, 241, 0.15); display: flex; align-items: center; justify-content: center; color: var(--primary); flex-shrink: 0;">
                         <i class="fa-solid fa-vault" style="font-size: 1.25rem;"></i>
                     </div>
                     <div>
-                        <h3 class="card-title" style="margin: 0;">Platform Receiving & Settlement Account</h3>
+                        <h3 class="card-title" style="margin: 0; word-break: break-word;">Platform Receiving & Settlement Account</h3>
                         <p style="margin: 0; font-size: 0.75rem; color: var(--text-muted);">
                             Designated platform treasury account to receive company shares and fees after artist/label payout calculations
                         </p>
                     </div>
                 </div>
-                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                     <span class="badge badge-approved" style="background: rgba(16, 185, 129, 0.15); border-color: rgba(16, 185, 129, 0.3);">
                         <i class="fa-solid fa-shield-halved"></i> High-Security Protected
                     </span>
@@ -53,14 +53,14 @@
 
                     <div>
                         <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 600;">Account Holder Name</span>
-                        <div style="font-weight: 600; color: var(--text-primary); font-size: 1rem; margin-top: 0.25rem;">
+                        <div style="font-weight: 600; color: var(--text-primary); font-size: 1rem; margin-top: 0.25rem; word-break: break-word;">
                             {{ $platformPayoutAccount['account_name'] ?? 'Not Configured' }}
                         </div>
                     </div>
 
-                    <div>
+                    <div class="text-break-all">
                         <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 600;">Account / IBAN / Phone</span>
-                        <div style="font-family: monospace; font-weight: 700; color: var(--success); font-size: 1.05rem; margin-top: 0.25rem;">
+                        <div style="font-family: monospace; font-weight: 700; color: var(--success); font-size: 1.05rem; margin-top: 0.25rem; word-break: break-all;">
                             {{ $platformPayoutAccount['account_number'] ?? 'N/A' }}
                         </div>
                     </div>
@@ -68,16 +68,16 @@
                     @if(!empty($platformPayoutAccount['bank_name']))
                         <div>
                             <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 600;">Banking Institution</span>
-                            <div style="color: var(--text-primary); font-size: 0.9rem; margin-top: 0.25rem;">
+                            <div style="color: var(--text-primary); font-size: 0.9rem; margin-top: 0.25rem; word-break: break-word;">
                                 {{ $platformPayoutAccount['bank_name'] }}
                             </div>
                         </div>
                     @endif
 
                     @if(!empty($platformPayoutAccount['routing_swift']))
-                        <div>
+                        <div class="text-break-all">
                             <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 600;">SWIFT / BIC / Routing Code</span>
-                            <div style="font-family: monospace; color: var(--text-primary); font-size: 0.9rem; margin-top: 0.25rem;">
+                            <div style="font-family: monospace; color: var(--text-primary); font-size: 0.9rem; margin-top: 0.25rem; word-break: break-all;">
                                 {{ $platformPayoutAccount['routing_swift'] }}
                             </div>
                         </div>
@@ -91,25 +91,25 @@
                     </div>
 
                     @if(!empty($platformPayoutAccount['paypal_email']))
-                        <div>
+                        <div class="text-break-all">
                             <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 600;">PayPal Treasury Email</span>
-                            <div style="color: var(--text-primary); font-size: 0.9rem; margin-top: 0.25rem;">
+                            <div style="color: var(--text-primary); font-size: 0.9rem; margin-top: 0.25rem; word-break: break-all;">
                                 {{ $platformPayoutAccount['paypal_email'] }}
                             </div>
                         </div>
                     @endif
 
                     @if(!empty($platformPayoutAccount['notes']))
-                        <div style="grid-column: span 3;">
+                        <div style="grid-column: 1 / -1;">
                             <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--text-muted); display: block; font-weight: 600;">Operational Notes</span>
-                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem;">
+                            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.25rem; word-break: break-word;">
                                 {{ $platformPayoutAccount['notes'] }}
                             </div>
                         </div>
                     @endif
                 </div>
 
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem;">
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid rgba(255,255,255,0.05); padding-top: 0.75rem; flex-wrap: wrap; gap: 0.5rem;">
                     <div>
                         <i class="fa-solid fa-user-shield" style="color: var(--primary); margin-right: 0.25rem;"></i>
                         Last Verified & Updated by: <strong>{{ $platformPayoutAccount['updated_by_name'] ?? 'Administrator' }}</strong> ({{ $platformPayoutAccount['updated_by_email'] ?? 'admin@collegemusic.io' }})
@@ -263,9 +263,9 @@
     </div>
 
     <!-- Payout Requests -->
-    <div style="grid-column: span 2;">
+    <div style="grid-column: 1 / -1; width: 100%;">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                 <h3 class="card-title"><i class="fa-solid fa-hand-holding-dollar"></i> Artist Royalty Withdrawal Requests</h3>
             </div>
             <div class="card-body" style="padding: 0;">
@@ -273,7 +273,7 @@
                     <p style="text-align: center; color: var(--text-muted); padding: 3rem 0;">No withdrawal requests found.</p>
                 @else
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table" style="min-width: 700px;">
                             <thead>
                                 <tr>
                                     <th>Artist User</th>
@@ -289,16 +289,16 @@
                                 @foreach($withdrawals as $withdrawal)
                                     <tr>
                                         <td>
-                                            <div style="font-weight: bold;">{{ $withdrawal->user->name }}</div>
-                                            <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ $withdrawal->user->email }}</span>
+                                            <div style="font-weight: bold; white-space: nowrap;">{{ $withdrawal->user->name }}</div>
+                                            <span style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap;">{{ $withdrawal->user->email }}</span>
                                         </td>
-                                        <td style="font-weight: 700; color: var(--primary);">${{ number_format($withdrawal->amount, 2) }}</td>
-                                        <td><span style="text-transform: capitalize;">{{ str_replace('_', ' ', $withdrawal->payment_method) }}</span></td>
-                                        <td style="font-family: monospace; font-size: 0.8rem; max-width: 250px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $withdrawal->payment_details }}">
+                                        <td style="font-weight: 700; color: var(--primary); white-space: nowrap;">${{ number_format($withdrawal->amount, 2) }}</td>
+                                        <td><span style="text-transform: capitalize; white-space: nowrap;">{{ str_replace('_', ' ', $withdrawal->payment_method) }}</span></td>
+                                        <td style="font-family: monospace; font-size: 0.8rem; max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="{{ $withdrawal->payment_details }}">
                                             {{ $withdrawal->payment_details }}
                                         </td>
-                                        <td>{{ $withdrawal->created_at->format('Y-m-d H:i') }}</td>
-                                        <td>
+                                        <td style="white-space: nowrap;">{{ $withdrawal->created_at->format('Y-m-d H:i') }}</td>
+                                        <td style="white-space: nowrap;">
                                             @if($withdrawal->status === 'pending')
                                                 <span class="badge badge-pending">Pending Approval</span>
                                             @elseif($withdrawal->status === 'completed')
@@ -307,9 +307,9 @@
                                                 <span class="badge badge-rejected" title="Reason: {{ $withdrawal->rejection_reason }}">Rejected</span>
                                             @endif
                                         </td>
-                                        <td style="text-align: right; vertical-align: middle;">
+                                        <td style="text-align: right; vertical-align: middle; white-space: nowrap;">
                                             @if($withdrawal->status === 'pending')
-                                                <div style="display: inline-flex; gap: 0.4rem; justify-content: flex-end;">
+                                                <div style="display: inline-flex; gap: 0.4rem; justify-content: flex-end; flex-wrap: wrap;">
                                                     <form action="{{ route('admin.withdrawals.status', $withdrawal->id) }}" method="POST" style="margin: 0;">
                                                         @csrf
                                                         <input type="hidden" name="status" value="completed">
@@ -355,9 +355,9 @@
     </div>
 
     <!-- Platform Income History -->
-    <div style="grid-column: span 2;">
+    <div style="grid-column: 1 / -1; width: 100%;">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                 <h3 class="card-title"><i class="fa-solid fa-money-bill-wave"></i> Inbound Income Logs (Sales & Subscriptions)</h3>
             </div>
             <div class="card-body" style="padding: 0;">
@@ -365,7 +365,7 @@
                     <p style="text-align: center; color: var(--text-muted); padding: 3rem 0;">No incoming transactions recorded.</p>
                 @else
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table" style="min-width: 680px;">
                             <thead>
                                 <tr>
                                     <th>Invoice Number</th>
@@ -380,10 +380,10 @@
                             <tbody>
                                 @foreach($payments as $payment)
                                     <tr>
-                                        <td style="font-weight: 600; font-family: monospace;">{{ $payment->invoice_number }}</td>
+                                        <td style="font-weight: 600; font-family: monospace; white-space: nowrap;">{{ $payment->invoice_number }}</td>
                                         <td>
-                                            <div style="font-weight: 500;">{{ $payment->user->name }}</div>
-                                            <span style="font-size: 0.75rem; color: var(--text-secondary);">{{ $payment->user->email }}</span>
+                                            <div style="font-weight: 500; white-space: nowrap;">{{ $payment->user->name }}</div>
+                                            <span style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap;">{{ $payment->user->email }}</span>
                                         </td>
                                         <td>
                                             @if($payment->release)
@@ -394,10 +394,10 @@
                                                 Platform Fees
                                             @endif
                                         </td>
-                                        <td style="font-weight: bold; color: var(--success);">${{ number_format($payment->amount, 2) }}</td>
-                                        <td style="font-family: monospace; font-size: 0.85rem;">{{ $payment->transaction_reference }}</td>
-                                        <td>{{ $payment->created_at->format('Y-m-d H:i') }}</td>
-                                        <td style="text-align: right;">
+                                        <td style="font-weight: bold; color: var(--success); white-space: nowrap;">${{ number_format($payment->amount, 2) }}</td>
+                                        <td style="font-family: monospace; font-size: 0.85rem; white-space: nowrap;">{{ $payment->transaction_reference }}</td>
+                                        <td style="white-space: nowrap;">{{ $payment->created_at->format('Y-m-d H:i') }}</td>
+                                        <td style="text-align: right; white-space: nowrap;">
                                             <a href="{{ route('finance.invoice', $payment->id) }}" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.75rem;">
                                                 <i class="fa-solid fa-file-pdf"></i> Receipt Invoice
                                             </a>

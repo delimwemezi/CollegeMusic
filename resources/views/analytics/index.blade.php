@@ -10,7 +10,7 @@
         <p class="page-subtitle">Monitor your catalog's performance, download indicators, and audience reach</p>
     </div>
     <div>
-        <div style="display: flex; gap: 0.5rem;">
+        <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
             <a href="{{ route('analytics.report', ['period' => 'monthly']) }}" target="_blank" class="btn btn-secondary">
                 <i class="fa-solid fa-file-invoice"></i> Generate Monthly Report
             </a>

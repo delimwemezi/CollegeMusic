@@ -14,7 +14,7 @@
 <!-- Balance Cards -->
 <div class="grid-cols-3">
     <!-- Total Royalties Earned -->
-    <div class="stat-card" style="grid-column: span 1;">
+    <div class="stat-card">
         <div>
             <div class="stat-title">Total Royalty Earnings</div>
             <div class="stat-value" style="color: var(--primary);">${{ number_format($totalEarned, 4) }}</div>
@@ -24,7 +24,7 @@
     </div>
 
     <!-- Available Payout Balance -->
-    <div class="stat-card" style="grid-column: span 1; border-color: rgba(16, 185, 129, 0.2);">
+    <div class="stat-card" style="border-color: rgba(16, 185, 129, 0.2);">
         <div>
             <div class="stat-title">Available Payout Balance</div>
             <div class="stat-value" style="color: var(--success);">${{ number_format($availableBalance, 2) }}</div>
@@ -34,7 +34,7 @@
     </div>
 
     <!-- Active Subscription Card -->
-    <div class="stat-card" style="grid-column: span 1;">
+    <div class="stat-card">
         <div>
             <div class="stat-title">Active Billing Plan</div>
             @if($subscription && $subscription->plan_name === 'Premium' && $subscription->status === 'active' && $subscription->ends_at->isAfter(now()))
@@ -53,7 +53,7 @@
     <!-- Artist Payout Receiving Account Settings -->
     <div>
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                 <h3 class="card-title"><i class="fa-solid fa-building-columns"></i> Receiving Payout Account</h3>
                 @if($payoutAccount)
                     <span class="badge badge-approved"><i class="fa-solid fa-circle-check"></i> Account Configured</span>
@@ -68,12 +68,12 @@
 
                 @if($payoutAccount)
                     <div style="background-color: var(--bg-input); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.5rem;">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.75rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.75rem;">
                             <div>
                                 <span style="font-size: 0.75rem; text-transform: uppercase; color: var(--primary); font-weight: 700; letter-spacing: 0.05em;">
                                     {{ strtoupper(str_replace('_', ' ', $payoutAccount['payout_method'] ?? 'bank_transfer')) }}
                                 </span>
-                                <h4 style="margin: 0.25rem 0 0; color: var(--text-primary); font-size: 1.05rem;">
+                                <h4 style="margin: 0.25rem 0 0; color: var(--text-primary); font-size: 1.05rem; word-break: break-word;">
                                     {{ $payoutAccount['account_name'] ?? 'Account Holder' }}
                                 </h4>
                             </div>
@@ -81,22 +81,22 @@
                         </div>
 
                         <div class="grid-cols-2" style="gap: 0.75rem; font-size: 0.85rem; margin-bottom: 0.5rem;">
-                            <div>
+                            <div class="text-break-all">
                                 <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Account / Phone / IBAN:</span>
-                                <strong style="font-family: monospace; color: var(--text-primary);">
+                                <strong style="font-family: monospace; color: var(--text-primary); word-break: break-all;">
                                     {{ $payoutAccount['account_number'] ?? 'N/A' }}
                                 </strong>
                             </div>
                             @if(!empty($payoutAccount['bank_name']))
                                 <div>
                                     <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Bank / Institution:</span>
-                                    <span style="color: var(--text-primary);">{{ $payoutAccount['bank_name'] }}</span>
+                                    <span style="color: var(--text-primary); word-break: break-word;">{{ $payoutAccount['bank_name'] }}</span>
                                 </div>
                             @endif
                             @if(!empty($payoutAccount['routing_number']))
-                                <div>
+                                <div class="text-break-all">
                                     <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">Routing / SWIFT:</span>
-                                    <span style="font-family: monospace; color: var(--text-primary);">{{ $payoutAccount['routing_number'] }}</span>
+                                    <span style="font-family: monospace; color: var(--text-primary); word-break: break-all;">{{ $payoutAccount['routing_number'] }}</span>
                                 </div>
                             @endif
                             @if(!empty($payoutAccount['mobile_network']))
@@ -106,9 +106,9 @@
                                 </div>
                             @endif
                             @if(!empty($payoutAccount['paypal_email']))
-                                <div>
+                                <div class="text-break-all">
                                     <span style="color: var(--text-muted); display: block; font-size: 0.75rem;">PayPal Email:</span>
-                                    <span style="color: var(--text-primary);">{{ $payoutAccount['paypal_email'] }}</span>
+                                    <span style="color: var(--text-primary); word-break: break-all;">{{ $payoutAccount['paypal_email'] }}</span>
                                 </div>
                             @endif
                         </div>
@@ -197,13 +197,13 @@
                     </div>
                 @else
                     @if($payoutAccount)
-                        <div style="margin-bottom: 1.25rem; padding: 0.85rem 1rem; border-radius: var(--radius-md); background-color: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: space-between;">
-                            <div style="font-size: 0.85rem;">
+                        <div style="margin-bottom: 1.25rem; padding: 0.85rem 1rem; border-radius: var(--radius-md); background-color: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.2); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 0.75rem;">
+                            <div style="font-size: 0.85rem; min-width: 0; flex: 1;">
                                 <i class="fa-solid fa-check-circle" style="color: var(--success); margin-right: 0.35rem;"></i>
                                 <span style="color: var(--text-primary); font-weight: 600;">Saved Target:</span> 
-                                <span style="color: var(--text-secondary);">{{ $payoutAccount['account_name'] }} ({{ $payoutAccount['account_number'] }})</span>
+                                <span style="color: var(--text-secondary); word-break: break-all;">{{ $payoutAccount['account_name'] }} ({{ $payoutAccount['account_number'] }})</span>
                             </div>
-                            <button type="button" class="btn btn-secondary btn-sm" onclick="populateSavedPayoutAccount()" style="padding: 0.25rem 0.6rem; font-size: 0.75rem;">
+                            <button type="button" class="btn btn-secondary btn-sm" onclick="populateSavedPayoutAccount()" style="padding: 0.35rem 0.75rem; font-size: 0.8rem; flex-shrink: 0;">
                                 <i class="fa-solid fa-bolt"></i> Auto-Fill
                             </button>
                         </div>
@@ -314,27 +314,27 @@
                             <div class="grid-cols-2" style="gap: 0.75rem; font-size: 0.85rem; background: var(--bg-card); padding: 0.85rem; border-radius: var(--radius-sm); border: 1px solid var(--border-color);">
                                 <div id="finSettlementBank">
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Bank:</span>
-                                    <strong>{{ $platformAccount['bank_name'] ?? 'JPMorgan Chase Bank, N.A.' }}</strong>
+                                    <strong style="word-break: break-word;">{{ $platformAccount['bank_name'] ?? 'JPMorgan Chase Bank, N.A.' }}</strong>
                                 </div>
-                                <div>
+                                <div class="text-break-all">
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Account / Till:</span>
-                                    <strong style="color: var(--success); font-family: monospace;">{{ $platformAccount['account_number'] ?? '987654321098' }}</strong>
+                                    <strong style="color: var(--success); font-family: monospace; word-break: break-all;">{{ $platformAccount['account_number'] ?? '987654321098' }}</strong>
                                 </div>
                                 <div>
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Beneficiary:</span>
-                                    <span>{{ $platformAccount['account_name'] ?? 'CollegeMusic Global Distribution LLC' }}</span>
+                                    <span style="word-break: break-word;">{{ $platformAccount['account_name'] ?? 'CollegeMusic Global Distribution LLC' }}</span>
                                 </div>
-                                <div id="finSettlementRouting">
+                                <div id="finSettlementRouting" class="text-break-all">
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">SWIFT / Routing:</span>
-                                    <span style="font-family: monospace;">{{ $platformAccount['routing_swift'] ?? 'CHASUS33XXX' }}</span>
+                                    <span style="font-family: monospace; word-break: break-all;">{{ $platformAccount['routing_swift'] ?? 'CHASUS33XXX' }}</span>
                                 </div>
-                                <div id="finSettlementMobile" style="display: none; grid-column: span 2;">
+                                <div id="finSettlementMobile" style="display: none; grid-column: 1 / -1;">
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">Operator / Network:</span>
                                     <span>{{ $platformAccount['mobile_network'] ?? 'Safaricom M-Pesa' }}</span>
                                 </div>
-                                <div id="finSettlementPaypal" style="display: none; grid-column: span 2;">
+                                <div id="finSettlementPaypal" style="display: none; grid-column: 1 / -1;" class="text-break-all">
                                     <span style="font-size: 0.75rem; color: var(--text-muted); display: block;">PayPal Email:</span>
-                                    <span>{{ $platformAccount['paypal_email'] ?? 'finance@collegemusic.io' }}</span>
+                                    <span style="word-break: break-all;">{{ $platformAccount['paypal_email'] ?? 'finance@collegemusic.io' }}</span>
                                 </div>
                             </div>
                         </div>
@@ -390,9 +390,9 @@
 </div>
 
     <!-- Payout Logs -->
-    <div style="grid-column: span 2;">
+    <div style="grid-column: 1 / -1; width: 100%;">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                 <h3 class="card-title"><i class="fa-solid fa-clock-rotate-left"></i> Withdrawal Requests & Payout Logs</h3>
             </div>
             <div class="card-body" style="padding: 0;">
@@ -400,7 +400,7 @@
                     <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No previous withdrawal requests found.</p>
                 @else
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table" style="min-width: 580px;">
                             <thead>
                                 <tr>
                                     <th>Receipt Number</th>
@@ -414,11 +414,11 @@
                             <tbody>
                                 @foreach($withdrawals as $withdrawal)
                                     <tr>
-                                        <td style="font-family: monospace; font-weight: 600;">{{ $withdrawal->invoice_number }}</td>
-                                        <td style="text-transform: capitalize;">{{ str_replace('_', ' ', $withdrawal->payment_method) }}</td>
-                                        <td style="font-weight: bold; color: var(--primary);">${{ number_format($withdrawal->amount, 2) }}</td>
-                                        <td>{{ $withdrawal->created_at->format('Y-m-d H:i') }}</td>
-                                        <td>
+                                        <td style="font-family: monospace; font-weight: 600; white-space: nowrap;">{{ $withdrawal->invoice_number }}</td>
+                                        <td style="text-transform: capitalize; white-space: nowrap;">{{ str_replace('_', ' ', $withdrawal->payment_method) }}</td>
+                                        <td style="font-weight: bold; color: var(--primary); white-space: nowrap;">${{ number_format($withdrawal->amount, 2) }}</td>
+                                        <td style="white-space: nowrap;">{{ $withdrawal->created_at->format('Y-m-d H:i') }}</td>
+                                        <td style="white-space: nowrap;">
                                             @if($withdrawal->status === 'pending')
                                                 <span class="badge badge-pending">Review Pending</span>
                                             @elseif($withdrawal->status === 'completed')
@@ -427,7 +427,7 @@
                                                 <span class="badge badge-rejected" title="Reason: {{ $withdrawal->rejection_reason }}">Rejected</span>
                                             @endif
                                         </td>
-                                        <td style="text-align: right;">
+                                        <td style="text-align: right; white-space: nowrap;">
                                             @if($withdrawal->status === 'completed')
                                                 <a href="{{ route('finance.withdrawal.invoice', $withdrawal->id) }}" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                                                     <i class="fa-solid fa-file-pdf"></i> Receipt
@@ -447,9 +447,9 @@
     </div>
 
     <!-- Payments Logs -->
-    <div style="grid-column: span 2;">
+    <div style="grid-column: 1 / -1; width: 100%;">
         <div class="card">
-            <div class="card-header">
+            <div class="card-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                 <h3 class="card-title"><i class="fa-solid fa-receipt"></i> Payment & Invoice Logs</h3>
             </div>
             <div class="card-body" style="padding: 0;">
@@ -457,7 +457,7 @@
                     <p style="text-align: center; color: var(--text-muted); padding: 2rem;">No inbound payments found.</p>
                 @else
                     <div class="table-responsive">
-                        <table class="table">
+                        <table class="table" style="min-width: 580px;">
                             <thead>
                                 <tr>
                                     <th>Invoice Number</th>
@@ -471,10 +471,10 @@
                             <tbody>
                                 @foreach($payments as $payment)
                                     <tr>
-                                        <td style="font-family: monospace; font-weight: 600;">{{ $payment->invoice_number }}</td>
-                                        <td style="font-family: monospace; font-size: 0.85rem;">{{ $payment->transaction_reference }}</td>
-                                        <td style="font-weight: bold; color: var(--success);">${{ number_format($payment->amount, 2) }}</td>
-                                        <td>
+                                        <td style="font-family: monospace; font-weight: 600; white-space: nowrap;">{{ $payment->invoice_number }}</td>
+                                        <td style="font-family: monospace; font-size: 0.85rem; white-space: nowrap;">{{ $payment->transaction_reference }}</td>
+                                        <td style="font-weight: bold; color: var(--success); white-space: nowrap;">${{ number_format($payment->amount, 2) }}</td>
+                                        <td style="white-space: nowrap;">
                                             @if($payment->release)
                                                 Distribution: {{ $payment->release->title }}
                                             @elseif($payment->subscription)
@@ -483,8 +483,8 @@
                                                 System Fees
                                             @endif
                                         </td>
-                                        <td>{{ $payment->created_at->format('Y-m-d H:i') }}</td>
-                                        <td style="text-align: right;">
+                                        <td style="white-space: nowrap;">{{ $payment->created_at->format('Y-m-d H:i') }}</td>
+                                        <td style="text-align: right; white-space: nowrap;">
                                             <a href="{{ route('finance.invoice', $payment->id) }}" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">
                                                 <i class="fa-solid fa-file-pdf"></i> View Invoice
                                             </a>
