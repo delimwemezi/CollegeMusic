@@ -26,18 +26,26 @@ class SystemSetting extends Model
 
     public static function get(string $key, $default = null)
     {
-        $setting = static::where('key', $key)->first();
-        return $setting ? $setting->value : $default;
+        try {
+            $setting = static::where('key', $key)->first();
+            return $setting ? $setting->value : $default;
+        } catch (\Throwable $e) {
+            return $default;
+        }
     }
 
     public static function set(string $key, $value, ?int $userId = null)
     {
-        return static::updateOrCreate(
-            ['key' => $key],
-            [
-                'value' => $value,
-                'updated_by' => $userId,
-            ]
-        );
+        try {
+            return static::updateOrCreate(
+                ['key' => $key],
+                [
+                    'value' => $value,
+                    'updated_by' => $userId,
+                ]
+            );
+        } catch (\Throwable $e) {
+            return null;
+        }
     }
 }
