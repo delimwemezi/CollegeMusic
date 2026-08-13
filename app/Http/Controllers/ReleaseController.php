@@ -144,7 +144,7 @@ class ReleaseController extends Controller
             AuditLog::create([
                 'user_id' => $user->id,
                 'action' => 'upload_release',
-                'description' => "Uploaded release '{$release->title}' for review. Fee calculated: ${$fee}.",
+                'description' => "Uploaded release '{$release->title}' for review. Fee calculated: $" . number_format($fee, 2),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -326,7 +326,7 @@ class ReleaseController extends Controller
             AuditLog::create([
                 'user_id' => $user->id,
                 'action' => 'pay_release_fee',
-                'description' => "Paid ${$fee} distribution fee for '{$release->title}'. Ref: {$ref}.",
+                'description' => "Paid $" . number_format($fee, 2) . " distribution fee for '{$release->title}'. Ref: {$ref}.",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);

@@ -156,6 +156,14 @@
             transition: var(--transition);
         }
 
+        /* Mobile-only explore link (shown when full nav is hidden) */
+        .mobile-explore {
+            display: none;
+            align-items: center;
+            gap: 0.5rem;
+            font-weight: 600;
+        }
+
         .nav-link:hover, .nav-link.active {
             color: var(--text-primary);
         }
@@ -890,6 +898,11 @@
                 padding: 0.45rem 1rem !important;
                 font-size: 0.78rem !important;
             }
+            /* show mobile explore link when full nav is hidden */
+            .mobile-explore {
+                display: inline-flex;
+                color: var(--primary);
+            }
         }
 
         @media (max-width: 576px) {
@@ -1212,6 +1225,7 @@
 
                 <a href="{{ route('login') }}" class="nav-link" style="margin-right: 0.25rem; font-weight: 600;">{{ __('messages.sign_in') }}</a>
                 <a href="{{ route('register') }}" class="btn btn-primary" style="padding: 0.55rem 1.25rem; font-size: 0.85rem;">{{ __('messages.get_started') }}</a>
+                <a href="{{ route('explore') }}" class="nav-link mobile-explore" style="color: var(--primary); font-weight: bold;"><i class="fa-solid fa-compass"></i> {{ __('messages.explore_music') }}</a>
             </div>
         </div>
     </nav>
