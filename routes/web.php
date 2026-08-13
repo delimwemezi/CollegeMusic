@@ -8,6 +8,12 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
+// Temporary debug route to confirm which app directory the webserver is using.
+// Remove this once you've confirmed the path.
+Route::get('/_whoami', function () {
+    return response()->json(['base_path' => base_path(), 'public_path' => public_path()]);
+});
+
 Route::get('/explore', [\App\Http\Controllers\SearchController::class, 'explore'])->name('explore');
 
 // Authentication Routes
