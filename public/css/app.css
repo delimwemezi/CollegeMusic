@@ -865,10 +865,40 @@ input::-webkit-credentials-auto-fill-button {
     
     .header-actions {
         gap: 0.6rem;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        max-width: 190px;
+        scrollbar-width: none;
+        display: flex;
+        align-items: center;
     }
     
-    .header-logout-btn {
-        display: none !important;
+    .header-actions::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .header-actions > * {
+        flex-shrink: 0;
+    }
+    
+    .footer-links-container {
+        width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        padding: 0.5rem 0;
+        display: flex;
+        align-items: center;
+    }
+    
+    .footer-links-container::-webkit-scrollbar {
+        display: none;
+    }
+    
+    .footer-links-container > * {
+        flex-shrink: 0;
     }
     
     .main-container {

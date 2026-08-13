@@ -171,11 +171,55 @@ class AdminController extends Controller
             // Set all associated stores status to distributed
             ReleaseStore::where('release_id', $release->id)->update(['status' => 'distributed']);
 
+            // Connect to stores with free API (httpbin.org/post) for testing functioning of external APIs
+            $apiSuccess = false;
+            $apiMessage = '';
+            try {
+                $response = \Illuminate\Support\Facades\Http::timeout(10)->post('https://httpbin.org/post', [
+                    'event' => 'music_distribution',
+                    'provider' => 'CollegeMusic Global Distribution',
+                    'release' => [
+                        'id' => $release->id,
+                        'title' => $release->title,
+                        'type' => $release->type,
+                        'genre' => $release->genre,
+                        'language' => $release->language,
+                        'copyright' => $release->copyright_info,
+                        'cover_url' => asset('storage/' . $release->cover_image),
+                    ],
+                    'artist' => [
+                        'id' => $release->artist->id,
+                        'name' => $release->artist->name,
+                    ],
+                    'tracks' => $release->tracks->map(function ($track) {
+                        return [
+                            'title' => $track->title,
+                            'composer' => $track->composer,
+                            'songwriter' => $track->songwriter,
+                            'isrc' => $track->isrc,
+                            'duration_seconds' => $track->duration,
+                            'audio_url' => asset('storage/' . $track->audio_file),
+                        ];
+                    })->toArray(),
+                    'stores' => ReleaseStore::where('release_id', $release->id)->pluck('store_name')->toArray(),
+                ]);
+
+                if ($response->successful()) {
+                    $apiSuccess = true;
+                    $responseData = $response->json();
+                    $apiMessage = "Successfully connected to stores API. Distributed release ID: " . ($responseData['json']['release']['id'] ?? $release->id);
+                } else {
+                    $apiMessage = "Stores API returned error code " . $response->status() . ". Simulated fallback distribution completed.";
+                }
+            } catch (\Exception $e) {
+                $apiMessage = "Stores API connection error: " . $e->getMessage() . ". Simulated fallback distribution completed.";
+            }
+
             // Create notification alert for artist
             AuditLog::create([
                 'user_id' => $release->artist->user_id,
                 'action' => 'release_distributed',
-                'description' => "Distribution completed! Your release '{$release->title}' is now live on digital platforms.",
+                'description' => "Distribution completed! Your release '{$release->title}' is now live on digital platforms. " . ($apiSuccess ? "(API Transmitted)" : "(Simulated Fallback)"),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -183,12 +227,12 @@ class AdminController extends Controller
             AuditLog::create([
                 'user_id' => Auth::id(),
                 'action' => 'admin_distribute_release',
-                'description' => "Simulated store distribution pipeline for '{$release->title}'.",
+                'description' => "Store distribution pipeline. API Call Log: " . $apiMessage,
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
 
-            return back()->with('success', "Release '{$release->title}' has been successfully distributed to streaming platforms!");
+            return back()->with('success', "Release '{$release->title}' has been successfully distributed to streaming platforms! API Call Log: " . $apiMessage);
         }
 
         return back()->with('error', 'Invalid review action.');

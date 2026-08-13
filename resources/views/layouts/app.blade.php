@@ -302,7 +302,7 @@
                     <div>
                         <span>&copy; {{ date('Y') }} CollegeMusic Global Music Distribution. All rights reserved.</span>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 1.25rem;">
+                    <div class="footer-links-container" style="display: flex; align-items: center; gap: 1.25rem;">
                         <a href="{{ route('home') }}" style="color: var(--primary); font-weight: 600; text-decoration: none; display: inline-flex; align-items: center; gap: 0.35rem;" title="Go to CollegeMusic Home Page">
                             <i class="fa-solid fa-house"></i> Home Page
                         </a>

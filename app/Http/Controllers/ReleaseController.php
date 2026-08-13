@@ -47,7 +47,7 @@ class ReleaseController extends Controller
         $user = Auth::user();
 
         // Validate basic release info
-        $request->validate([
+        $rules = [
             'artist_id' => 'required|exists:artists,id',
             'title' => 'required|string|max:255',
             'type' => 'required|string|in:single,album,ep',
@@ -68,9 +68,17 @@ class ReleaseController extends Controller
             'track_songwriter.*' => 'required|string|max:255',
             'track_isrc' => 'nullable|array',
             'track_isrc.*' => 'nullable|string|max:50',
-            'track_file' => 'required|array|min:1',
-            'track_file.*' => 'required|file|mimes:mp3,wav,flac|max:20480', // 20MB audio tracks
-        ]);
+        ];
+
+        if ($request->boolean('use_mock_audio')) {
+            $rules['track_file'] = 'nullable|array';
+            $rules['track_file.*'] = 'nullable';
+        } else {
+            $rules['track_file'] = 'required|array|min:1';
+            $rules['track_file.*'] = 'required|file|mimes:mp3,wav,flac|max:20480'; // 20MB audio tracks
+        }
+
+        $request->validate($rules);
 
         // Security check: ensure user owns the selected artist
         $artist = Artist::findOrFail($request->artist_id);
@@ -121,7 +129,14 @@ class ReleaseController extends Controller
 
             // Save Tracks
             foreach ($request->track_title as $index => $trackTitle) {
-                $audioPath = $request->file('track_file')[$index]->store('tracks', 'public');
+                if ($request->hasFile('track_file') && isset($request->file('track_file')[$index])) {
+                    $audioPath = $request->file('track_file')[$index]->store('tracks', 'public');
+                } else {
+                    $audioPath = 'tracks/mock_audio.mp3';
+                    if (!Storage::disk('public')->exists($audioPath)) {
+                        Storage::disk('public')->put($audioPath, 'MOCK AUDIO CONTENT FOR SYSTEM TESTING');
+                    }
+                }
                 
                 // Simulate duration (e.g. random 180 to 240 seconds)
                 $duration = rand(180, 240);
