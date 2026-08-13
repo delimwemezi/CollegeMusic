@@ -182,21 +182,24 @@
                 @endif
             </ul>
 
-            <div class="sidebar-footer">
+            <div class="sidebar-footer" style="display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;">
                 @if($user)
-                    <div class="user-profile-widget">
+                    <div class="user-profile-widget" style="flex: 1; min-width: 0;">
                         @if($user->artist && $user->artist->profile_picture)
                             <img src="{{ asset('storage/' . $user->artist->profile_picture) }}" alt="Avatar" class="profile-avatar">
                         @else
-                            <div class="profile-avatar" style="background-color: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; border: 2px solid var(--border-color);">
+                            <div class="profile-avatar" style="background-color: var(--primary); display: flex; align-items: center; justify-content: center; color: #fff; font-weight: bold; border: 2px solid var(--border-color); flex-shrink: 0;">
                                 {{ strtoupper(substr($user->name, 0, 2)) }}
                             </div>
                         @endif
-                        <div class="profile-info">
-                            <div class="profile-name">{{ $user->name }}</div>
-                            <div class="profile-role">{{ str_replace('_', ' ', $user->role) }}</div>
+                        <div class="profile-info" style="min-width: 0;">
+                            <div class="profile-name" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ $user->name }}</div>
+                            <div class="profile-role" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ str_replace('_', ' ', $user->role) }}</div>
                         </div>
                     </div>
+                    <a href="{{ route('logout') }}" class="btn btn-secondary btn-sm sidebar-logout-btn" style="background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 0.45rem 0.65rem;" title="Logout">
+                        <i class="fa-solid fa-right-from-bracket"></i>
+                    </a>
                 @endif
             </div>
         </aside>
@@ -263,7 +266,7 @@
                     </div>
 
                     <!-- Sign Out Link -->
-                    <a href="{{ route('logout') }}" class="btn btn-secondary btn-sm" style="background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5;">
+                    <a href="{{ route('logout') }}" class="btn btn-secondary btn-sm header-logout-btn" style="background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5;">
                         <i class="fa-solid fa-right-from-bracket"></i> Logout
                     </a>
                 </div>

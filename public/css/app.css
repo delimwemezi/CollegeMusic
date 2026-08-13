@@ -867,6 +867,10 @@ input::-webkit-credentials-auto-fill-button {
         gap: 0.6rem;
     }
     
+    .header-logout-btn {
+        display: none !important;
+    }
+    
     .main-container {
         padding: 1rem 0.75rem;
     }
