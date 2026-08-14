@@ -462,6 +462,118 @@
         margin: 0 auto 1.25rem;
         box-shadow: 0 4px 10px rgba(99, 102, 241, 0.3);
     }
+
+    /* Responsive adjustments for tablet and mobile */
+    @media (max-width: 992px) {
+        .explore-grid {
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .explore-grid,
+        .artist-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .explore-card {
+            flex-direction: row;
+            gap: 1rem;
+            align-items: stretch;
+        }
+
+        .explore-card-cover-wrapper {
+            width: 36%;
+            aspect-ratio: 1;
+        }
+
+        .explore-card-body {
+            padding: 0.9rem;
+        }
+
+        .explore-tabs {
+            gap: 0.75rem;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .explore-title {
+            font-size: 1.8rem;
+        }
+
+        .explore-subtitle {
+            font-size: 0.95rem;
+            padding: 0 1rem;
+        }
+
+        .floating-player {
+            height: 68px;
+            padding: 0.5rem 0.75rem;
+        }
+
+        .player-cover {
+            width: 44px;
+            height: 44px;
+        }
+
+        .player-metadata {
+            min-width: 140px;
+            max-width: 220px;
+            gap: 0.5rem;
+        }
+
+        .player-side-actions {
+            min-width: auto;
+            padding-right: 0.25rem;
+            border-left: none;
+        }
+
+        /* Simplify table columns on small screens to avoid horizontal overflow */
+        .table thead th:nth-child(4),
+        .table tbody td:nth-child(4),
+        .table thead th:nth-child(5),
+        .table tbody td:nth-child(5),
+        .table thead th:nth-child(6),
+        .table tbody td:nth-child(6) {
+            display: none;
+        }
+
+        .table thead th:nth-child(1),
+        .table tbody td:nth-child(1) {
+            width: 60px;
+        }
+
+        .search-input-field {
+            padding: 0.75rem 1rem 0.75rem 2.75rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .explore-card {
+            flex-direction: column;
+        }
+
+        .explore-card-cover-wrapper {
+            width: 100%;
+        }
+
+        .player-progress-area {
+            display: none;
+        }
+
+        .player-buttons {
+            gap: 0.6rem;
+        }
+
+        .player-cover {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo-text {
+            display: none;
+        }
+    }
 </style>
 @endsection
 
