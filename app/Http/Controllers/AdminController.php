@@ -99,6 +99,7 @@ class AdminController extends Controller
     public function releases()
     {
         $releases = Release::with('artist', 'tracks', 'stores')
+            ->where('distribution_status', '!=', 'awaiting_payment')
             ->orderByRaw("CASE WHEN distribution_status = 'pending' THEN 0 ELSE 1 END")
             ->orderBy('created_at', 'desc')
             ->paginate(15);
@@ -111,6 +112,18 @@ class AdminController extends Controller
             'action' => 'required|string|in:approve,reject,distribute',
             'rejection_reason' => 'required_if:action,reject|nullable|string',
         ]);
+
+        if ($request->action === 'approve' && $release->distribution_status !== 'pending') {
+            return back()->with('error', 'Only releases submitted for review can be approved or rejected.');
+        }
+
+        if ($request->action === 'reject' && !in_array($release->distribution_status, ['pending', 'pending_takedown'], true)) {
+            return back()->with('error', 'Only releases submitted for review can be rejected.');
+        }
+
+        if ($request->action === 'distribute' && $release->distribution_status !== 'approved') {
+            return back()->with('error', 'Only approved releases can be distributed.');
+        }
 
         if ($request->action === 'approve') {
             $release->distribution_status = 'approved';

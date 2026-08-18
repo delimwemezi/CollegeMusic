@@ -8,6 +8,7 @@ use App\Models\Track;
 use App\Models\ReleaseStore;
 use App\Models\Payment;
 use App\Models\AuditLog;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -93,7 +94,10 @@ class ReleaseController extends Controller
 
         // Check if user has an active premium subscription
         $hasPremium = $user->subscription && $user->subscription->plan_name === 'Premium' && $user->subscription->status === 'active' && $user->subscription->ends_at->isAfter(now());
-        if ($hasPremium) {
+        // Free-plan artists and Premium subscribers submit directly to review.
+        // Existing paid releases still use the checkout flow below.
+        $submitWithoutPayment = $hasPremium || !$user->subscription || $user->subscription->status !== 'active';
+        if ($submitWithoutPayment) {
             $fee = 0.00;
         }
 
@@ -113,8 +117,9 @@ class ReleaseController extends Controller
                 'release_date' => $request->scheduling_type === 'scheduled' ? $request->release_date : null,
                 'copyright_info' => $request->copyright_info,
                 'scheduling_type' => $request->scheduling_type,
-                'distribution_status' => 'pending',
-                'billing_status' => $fee == 0.00 ? 'paid' : 'unpaid',
+                // Paid releases must complete checkout before an administrator can review them.
+                'distribution_status' => $submitWithoutPayment ? 'pending' : 'awaiting_payment',
+                'billing_status' => $submitWithoutPayment ? 'paid' : 'unpaid',
                 'price_paid' => 0.00, // will be set once checkout completes
             ]);
 
@@ -164,12 +169,16 @@ class ReleaseController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
+            if ($submitWithoutPayment) {
+                $this->notifyAdminsOfSubmission($release, $request);
+            }
+
             DB::commit();
 
-            if ($fee > 0.00) {
+            if (!$submitWithoutPayment) {
                 return redirect()->route('releases.show', $release->id)->with('info', 'Release uploaded! Please process the distribution fee payment to submit for review.');
             } else {
-                return redirect()->route('catalogue')->with('success', 'Release submitted for administrator review (Free with Premium subscription)!');
+                return redirect()->route('releases.show', $release->id)->with('success', 'Release uploaded and submitted for administrator review.');
             }
 
         } catch (\Exception $e) {
@@ -241,7 +250,7 @@ class ReleaseController extends Controller
             'genre' => $request->genre,
             'language' => $request->language,
             'copyright_info' => $request->copyright_info,
-            'distribution_status' => 'pending', // reset to pending if rejected/changed
+            'distribution_status' => $release->billing_status === 'paid' ? 'pending' : 'awaiting_payment',
         ];
 
         if ($request->hasFile('cover_image')) {
@@ -259,7 +268,13 @@ class ReleaseController extends Controller
             'user_agent' => $request->userAgent()
         ]);
 
-        return redirect()->route('releases.show', $release->id)->with('success', 'Release updated successfully and sent back to review queue.');
+        if ($release->billing_status === 'paid') {
+            $this->notifyAdminsOfSubmission($release, $request);
+
+            return redirect()->route('releases.show', $release->id)->with('success', 'Release updated and resubmitted for administrator review.');
+        }
+
+        return redirect()->route('releases.show', $release->id)->with('info', 'Release updated. Complete payment to submit it for administrator review.');
     }
 
     public function takedown(Release $release)
@@ -322,6 +337,7 @@ class ReleaseController extends Controller
         try {
             $release->billing_status = 'paid';
             $release->price_paid = $fee;
+            $release->distribution_status = 'pending';
             $release->save();
 
             // Create Payment record
@@ -346,6 +362,8 @@ class ReleaseController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
+            $this->notifyAdminsOfSubmission($release, $request);
+
             DB::commit();
 
             return redirect()->route('releases.show', $release->id)->with('success', 'Payment processed successfully! Your music has been submitted for admin review.');
@@ -354,5 +372,21 @@ class ReleaseController extends Controller
             DB::rollBack();
             return back()->with('error', 'Checkout failed: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Notify every administrator when a release enters the review queue.
+     */
+    private function notifyAdminsOfSubmission(Release $release, Request $request): void
+    {
+        User::where('role', 'admin')->each(function (User $admin) use ($release, $request) {
+            AuditLog::create([
+                'user_id' => $admin->id,
+                'action' => 'release_submitted_for_review',
+                'description' => "Release '{$release->title}' by {$release->artist->name} is ready for administrator review.",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+        });
     }
 }
