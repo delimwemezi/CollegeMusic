@@ -1503,6 +1503,9 @@
             <button type="button" class="mobile-tab-btn" data-view-target="pricing" onclick="switchViewMode('pricing')">
                 <i class="fa-solid fa-tags"></i> {{ __('messages.pricing') }}
             </button>
+            <a href="{{ route('explore') }}" class="mobile-tab-btn mobile-explore-link">
+                <i class="fa-solid fa-compass"></i> {{ __('messages.explore_music') }}
+            </a>
         </div>
     </div>
 
