@@ -1910,46 +1910,6 @@
                 <p class="section-desc">{{ __('messages.success_stories') }}</p>
             </div>
             
-            <div class="testimonials-grid">
-                <div class="test-card">
-                    <p class="test-quote">
-                        CollegeMusic transformed the way I handle my releases. The upload wizard checked my cover dimensions and ISRC automatically, and I received approval in 24 hours. The available balance updates are so transparent.
-                    </p>
-                    <div class="test-user">
-                        <div class="test-avatar">BA</div>
-                        <div>
-                            <div class="test-name">Burna Boy</div>
-                            <div class="test-role">Afrobeats Musician</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="test-card">
-                    <p class="test-quote">
-                        Running a record label with 15 sub-artists used to require complex sheets. CollegeMusic allows me to upload under any artist, track stream geos, and handle withdrawals direct to mobile money accounts easily.
-                    </p>
-                    <div class="test-user">
-                        <div class="test-avatar">DM</div>
-                        <div>
-                            <div class="test-name">Don Jazzy</div>
-                            <div class="test-role">Label Executive (Mavin)</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="test-card">
-                    <p class="test-quote">
-                        The Premium Plan is a no-brainer. For $49.99 a year, I distribute unlimited tracks to Spotify and Apple. I keep 100% of what my streams make. It is the best deal on the internet.
-                    </p>
-                    <div class="test-user">
-                        <div class="test-avatar">TK</div>
-                        <div>
-                            <div class="test-name">Tems Baby</div>
-                            <div class="test-role">Grammy-Winning Singer</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
         </div>
     </section>
 
@@ -1975,7 +1935,7 @@
                     <p class="footer-desc">{{ __('messages.footer_tagline') }}</p>
                     <div class="footer-socials">
                         <a href="#" class="social-link"><i class="fa-brands fa-facebook"></i></a>
-                        <a href="#" class="social-link"><i class="fa-brands fa-twitter"></i></a>
+                        <a href="#" class="social-link"><i class="fa-brands fa-x"></i></a>
                         <a href="#" class="social-link"><i class="fa-brands fa-instagram"></i></a>
                         <a href="#" class="social-link"><i class="fa-brands fa-spotify"></i></a>
                     </div>
