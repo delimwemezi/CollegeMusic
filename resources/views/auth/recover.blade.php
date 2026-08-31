@@ -51,9 +51,9 @@
                     @csrf
                     
                     <div class="form-group">
-                        <label class="form-label" for="login">Email Address or Phone Number</label>
-                        <input type="text" id="login" name="login" class="form-input" placeholder="e.g. john@example.com or +1234567" value="{{ old('login') }}" required>
-                        @error('login')
+                        <label class="form-label" for="email">Email Address</label>
+                        <input type="email" id="email" name="email" class="form-input" placeholder="e.g. john@example.com" value="{{ old('email') }}" required>
+                        @error('email')
                             <span class="invalid-feedback" style="display: block;">{{ $message }}</span>
                         @enderror
                     </div>

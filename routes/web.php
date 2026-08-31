@@ -53,6 +53,8 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/artist/verify', [\App\Http\Controllers\ArtistController::class, 'submitVerification'])->name('artist.verify');
     Route::post('/artist/profile', [\App\Http\Controllers\ArtistController::class, 'updateProfile'])->name('artist.profile.update');
     Route::post('/artist/store', [\App\Http\Controllers\ArtistController::class, 'storeArtist'])->name('artist.store');
+    Route::post('/artist/verify-email/send', [\App\Http\Controllers\ArtistController::class, 'sendEmailVerification'])->name('artist.verify.email.send');
+    Route::post('/artist/verify-email/confirm', [\App\Http\Controllers\ArtistController::class, 'confirmEmailVerification'])->name('artist.verify.email.confirm');
     
     // Catalog Management (FR8)
     Route::get('/catalogue', [\App\Http\Controllers\ArtistController::class, 'catalogue'])->name('catalogue');

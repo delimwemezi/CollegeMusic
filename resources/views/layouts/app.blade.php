@@ -295,6 +295,13 @@
                     </div>
                 @endif
 
+                @if(session('info'))
+                    <div class="alert alert-warning" style="background-color: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.15); color: #93c5fd;">
+                        <i class="fa-solid fa-circle-info" style="color: var(--primary);"></i>
+                        <span>{{ session('info') }}</span>
+                    </div>
+                @endif
+
                 @yield('content')
 
                 <!-- Dashboard Footer with Home Shortcut -->

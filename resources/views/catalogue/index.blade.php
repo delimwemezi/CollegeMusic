@@ -171,28 +171,81 @@
                 </div>
 
                 @if(!$artist || $artist->verification_status !== 'verified')
-                    <form action="{{ route('artist.verify') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div class="form-group">
-                            <label class="form-label" for="doc_type">Document Type</label>
-                            <select id="doc_type" name="doc_type" class="form-select" required>
-                                <option value="National ID">National Identity Card / ID Card</option>
-                                <option value="Passport">International Passport</option>
-                                <option value="Drivers License">Driver's License</option>
-                                <option value="Label Certificate">Label Incorporation Document</option>
-                            </select>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="doc_file">Upload Document Scan</label>
-                            <input type="file" id="doc_file" name="doc_file" class="form-input" required>
-                            <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.35rem;">Supported formats: PDF, JPEG, PNG (Max 5MB)</small>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <i class="fa-solid fa-cloud-arrow-up"></i> Submit Documents for Review
+                    {{-- Verification Method Tabs --}}
+                    <div style="display: flex; gap: 0; margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color);">
+                        <button type="button" class="verify-method-tab active" id="tabEmailVerify" onclick="switchVerifyTab('email')" style="flex: 1; padding: 0.75rem 1rem; background: none; border: none; border-bottom: 2px solid var(--primary); margin-bottom: -2px; color: var(--primary); font-weight: 600; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-envelope"></i> Verify by Email
                         </button>
-                    </form>
+                        <button type="button" class="verify-method-tab" id="tabDocVerify" onclick="switchVerifyTab('document')" style="flex: 1; padding: 0.75rem 1rem; background: none; border: none; border-bottom: 2px solid transparent; margin-bottom: -2px; color: var(--text-muted); font-weight: 500; font-size: 0.85rem; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-file-arrow-up"></i> Upload Document
+                        </button>
+                    </div>
+
+                    {{-- EMAIL VERIFICATION PANEL --}}
+                    <div id="panelEmailVerify">
+                        <div style="padding: 1rem; border-radius: var(--radius-md); background: linear-gradient(135deg, rgba(59,130,246,0.06), rgba(139,92,246,0.06)); border: 1px solid rgba(59,130,246,0.15); margin-bottom: 1.25rem;">
+                            <p style="color: var(--text-secondary); font-size: 0.85rem; line-height: 1.5;">
+                                <i class="fa-solid fa-circle-info" style="color: var(--primary); margin-right: 0.25rem;"></i>
+                                We'll send a 6-digit verification code to your registered email <strong style="color: var(--text-primary);">{{ auth()->user()->email }}</strong>. Enter the code to verify your identity.
+                            </p>
+                        </div>
+
+                        @if(session('show_email_verify') || session('artist_verify_code'))
+
+                            <form action="{{ route('artist.verify.email.confirm') }}" method="POST">
+                                @csrf
+                                <div class="form-group">
+                                    <label class="form-label" for="verification_code">Enter 6-Digit Verification Code</label>
+                                    <input type="text" id="verification_code" name="verification_code" class="form-input" placeholder="e.g. 123456" maxlength="6" pattern="[0-9]{6}" required style="font-size: 1.5rem; text-align: center; letter-spacing: 0.35em; font-family: monospace; font-weight: bold;">
+                                </div>
+
+                                <button type="submit" class="btn btn-success btn-block" style="margin-bottom: 0.75rem;">
+                                    <i class="fa-solid fa-circle-check"></i> Confirm Verification Code
+                                </button>
+                            </form>
+
+                            <form action="{{ route('artist.verify.email.send') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-secondary btn-block" style="font-size: 0.8rem;">
+                                    <i class="fa-solid fa-rotate-right"></i> Resend Code
+                                </button>
+                            </form>
+                        @else
+                            {{-- Initial state — send code button --}}
+                            <form action="{{ route('artist.verify.email.send') }}" method="POST">
+                                @csrf
+                                <button type="submit" class="btn btn-primary btn-block">
+                                    <i class="fa-solid fa-paper-plane"></i> Send Verification Code to Email
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+
+                    {{-- DOCUMENT UPLOAD PANEL --}}
+                    <div id="panelDocVerify" style="display: none;">
+                        <form action="{{ route('artist.verify') }}" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="form-group">
+                                <label class="form-label" for="doc_type">Document Type</label>
+                                <select id="doc_type" name="doc_type" class="form-select" required>
+                                    <option value="National ID">National Identity Card / ID Card</option>
+                                    <option value="Passport">International Passport</option>
+                                    <option value="Drivers License">Driver's License</option>
+                                    <option value="Label Certificate">Label Incorporation Document</option>
+                                </select>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="form-label" for="doc_file">Upload Document Scan</label>
+                                <input type="file" id="doc_file" name="doc_file" class="form-input" required>
+                                <small style="color: var(--text-muted); font-size: 0.75rem; display: block; margin-top: 0.35rem;">Supported formats: PDF, JPEG, PNG (Max 5MB)</small>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fa-solid fa-cloud-arrow-up"></i> Submit Documents for Review
+                            </button>
+                        </form>
+                    </div>
                 @else
                     <div style="text-align: center; color: var(--success); padding: 2rem 0;">
                         <i class="fa-solid fa-circle-check" style="font-size: 3.5rem; margin-bottom: 1rem;"></i>
@@ -369,6 +422,39 @@
         btn.classList.add('active');
         btn.style.borderBottom = '2px solid var(--primary)';
         btn.style.color = 'var(--text-primary)';
+    }
+
+    function switchVerifyTab(method) {
+        var emailPanel = document.getElementById('panelEmailVerify');
+        var docPanel = document.getElementById('panelDocVerify');
+        var emailTab = document.getElementById('tabEmailVerify');
+        var docTab = document.getElementById('tabDocVerify');
+
+        if (emailPanel && docPanel && emailTab && docTab) {
+            if (method === 'email') {
+                emailPanel.style.display = 'block';
+                docPanel.style.display = 'none';
+                
+                emailTab.classList.add('active');
+                emailTab.style.color = 'var(--primary)';
+                emailTab.style.borderBottomColor = 'var(--primary)';
+                
+                docTab.classList.remove('active');
+                docTab.style.color = 'var(--text-muted)';
+                docTab.style.borderBottomColor = 'transparent';
+            } else {
+                emailPanel.style.display = 'none';
+                docPanel.style.display = 'block';
+                
+                emailTab.classList.remove('active');
+                emailTab.style.color = 'var(--text-muted)';
+                emailTab.style.borderBottomColor = 'transparent';
+                
+                docTab.classList.add('active');
+                docTab.style.color = 'var(--primary)';
+                docTab.style.borderBottomColor = 'var(--primary)';
+            }
+        }
     }
 </script>
 @endsection

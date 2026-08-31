@@ -48,9 +48,15 @@
                                     @endphp
                                     @forelse($docs as $doc)
                                         <div style="margin-bottom: 0.25rem;">
-                                            <a href="{{ asset('storage/' . $doc['path']) }}" target="_blank" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;">
-                                                <i class="fa-solid fa-file-pdf"></i> View {{ $doc['type'] }}
-                                            </a>
+                                            @if(isset($doc['type']) && $doc['type'] === 'Email Verification')
+                                                <span style="font-size: 0.8rem; color: var(--primary); display: inline-flex; align-items: center; gap: 0.25rem; font-weight: 500;">
+                                                    <i class="fa-solid fa-envelope-circle-check" style="color: var(--success);"></i> Email Verified ({{ $doc['email'] ?? '' }})
+                                                </span>
+                                            @else
+                                                <a href="{{ asset('storage/' . ($doc['path'] ?? '')) }}" target="_blank" class="btn btn-secondary btn-sm" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; display: inline-flex; align-items: center; gap: 0.25rem;">
+                                                    <i class="fa-solid fa-file-pdf"></i> View {{ $doc['type'] ?? 'Doc' }}
+                                                </a>
+                                            @endif
                                         </div>
                                     @empty
                                         <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">No documents uploaded</span>

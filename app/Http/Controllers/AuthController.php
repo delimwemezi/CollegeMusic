@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -218,33 +219,42 @@ class AuthController extends Controller
     public function recover(Request $request)
     {
         $request->validate([
-            'login' => 'required|string',
+            'email' => 'required|string|email',
         ]);
 
-        $loginType = filter_var($request->login, FILTER_VALIDATE_EMAIL) ? 'email' : 'phone';
-        $user = User::where($loginType, $request->login)->first();
+        $user = User::where('email', $request->email)->first();
 
         if (!$user) {
-            return back()->withErrors(['login' => 'No account found with this email/phone.'])->withInput();
+            return back()->withErrors(['email' => 'No account found with this email address.'])->withInput();
         }
 
-        // Generate recovery code
+        // Generate recovery code (OTP)
         $code = rand(100000, 999999);
         $user->verification_code = $code;
         $user->save();
 
         Log::info("Recovery code for User ID {$user->id}: {$code}");
-        session(['reset_email' => $user->email, 'debug_reset_code' => $code]);
+        session(['reset_email' => $user->email]);
+
+        // Send OTP email
+        try {
+            Mail::raw("Hello,\n\nYour CollegeMusic password recovery code (OTP) is: {$code}\n\nUse this code to verify your identity and set a new password. If you did not request this, please ignore this email.\n\nBest regards,\nCollegeMusic Team", function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('CollegeMusic Password Recovery OTP');
+            });
+        } catch (\Exception $e) {
+            Log::error("Failed to send password recovery email to {$user->email}: " . $e->getMessage());
+        }
 
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'request_password_reset',
-            'description' => 'Requested password recovery code.',
+            'description' => 'Requested password recovery code (OTP). Sent to email.',
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent()
         ]);
 
-        return redirect()->route('reset.show')->with('success', 'A password recovery code has been sent!');
+        return redirect()->route('reset.show')->with('success', 'A 6-digit password recovery code (OTP) has been sent to your email address!');
     }
 
     public function showReset()

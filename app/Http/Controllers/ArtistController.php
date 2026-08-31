@@ -7,6 +7,7 @@ use App\Models\Release;
 use App\Models\AuditLog;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Mail;
 
 class ArtistController extends Controller
 {
@@ -163,5 +164,119 @@ class ArtistController extends Controller
         ]);
 
         return back()->with('success', 'New artist profile registered successfully! It is pending verification review.');
+    }
+
+    /**
+     * Send email verification code for artist identity verification.
+     */
+    public function sendEmailVerification(Request $request)
+    {
+        $user = Auth::user();
+        $artist = $user->artist;
+
+        if (!$artist) {
+            $artist = Artist::create([
+                'user_id' => $user->id,
+                'name' => $user->name,
+                'verification_status' => 'unverified'
+            ]);
+        }
+
+        if ($artist->verification_status === 'verified') {
+            return back()->with('info', 'Your artist account is already verified.');
+        }
+
+        // Generate a 6-digit verification code
+        $code = rand(100000, 999999);
+
+        // Store code in session for verification
+        session([
+            'artist_verify_code' => $code,
+            'artist_verify_email' => $user->email,
+            'artist_verify_sent_at' => now()->toDateTimeString(),
+        ]);
+
+        // Log the code for demo/testing purposes
+        \Illuminate\Support\Facades\Log::info("Artist email verification code for {$user->email}: {$code}");
+
+        // Send verification email
+        try {
+            Mail::raw("Hello,\n\nYour CollegeMusic artist verification code is: {$code}\n\nUse this code to verify your identity and unlock distribution services.\n\nBest regards,\nCollegeMusic Team", function ($message) use ($user) {
+                $message->to($user->email)
+                        ->subject('CollegeMusic Artist Verification Code');
+            });
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Failed to send artist verification email to {$user->email}: " . $e->getMessage());
+        }
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'artist_email_verification_sent',
+            'description' => "Email verification code sent to {$user->email} for artist identity verification.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
+        return back()->with('success', "Verification code sent to {$user->email}! Enter the 6-digit code below to verify.")
+                     ->with('show_email_verify', true);
+    }
+
+    /**
+     * Confirm the email verification code for artist identity.
+     */
+    public function confirmEmailVerification(Request $request)
+    {
+        $user = Auth::user();
+        $artist = $user->artist;
+
+        if (!$artist) {
+            return back()->with('error', 'No artist profile found. Please create one first.');
+        }
+
+        $request->validate([
+            'verification_code' => 'required|string|size:6',
+        ]);
+
+        $storedCode = session('artist_verify_code');
+        $storedEmail = session('artist_verify_email');
+
+        if (!$storedCode || !$storedEmail) {
+            return back()->with('error', 'No verification code found. Please request a new code.');
+        }
+
+        if ($storedEmail !== $user->email) {
+            return back()->with('error', 'Email mismatch. Please request a new verification code.');
+        }
+
+        if ($request->verification_code != $storedCode) {
+            return back()->with('error', 'Invalid verification code. Please check the code and try again.')
+                         ->with('show_email_verify', true);
+        }
+
+        // Code is valid — mark artist as pending admin review
+        $artist->verification_status = 'pending';
+
+        // Store email verification record in documents
+        $docs = $artist->verification_documents ?? [];
+        $docs[] = [
+            'type' => 'Email Verification',
+            'email' => $user->email,
+            'verified_at' => now()->toDateTimeString(),
+        ];
+        $artist->verification_documents = $docs;
+        $artist->save();
+
+        // Clear session codes
+        session()->forget(['artist_verify_code', 'artist_verify_email', 'artist_verify_sent_at']);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'artist_email_verified',
+            'description' => "Artist email verification completed for {$user->email}. Awaiting admin approval.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent()
+        ]);
+
+        return back()->with('success', 'Email verified successfully! Your artist profile is now pending administrator approval.');
     }
 }

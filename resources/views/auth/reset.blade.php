@@ -60,14 +60,6 @@
                     </div>
                 @endif
 
-                @if(session('debug_reset_code'))
-                    <div style="background-color: rgba(99, 102, 241, 0.08); border: 1px dashed var(--primary); padding: 1rem; border-radius: var(--radius-md); margin-bottom: 1.5rem; text-align: center; font-size: 0.85rem;">
-                        <i class="fa-solid fa-bug" style="color: var(--primary); margin-right: 0.5rem;"></i>
-                        <strong style="color: var(--text-primary);">Demo Code Helper:</strong> 
-                        <span style="color: var(--primary); font-family: monospace; font-size: 1.15rem; font-weight: bold; margin-left: 0.5rem; letter-spacing: 0.1em;">{{ session('debug_reset_code') }}</span>
-                    </div>
-                @endif
-
                 <form action="{{ route('reset') }}" method="POST" style="display: flex; flex-direction: column; gap: 1rem;">
                     @csrf
                     
