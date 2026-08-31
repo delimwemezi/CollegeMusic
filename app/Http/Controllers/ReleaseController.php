@@ -69,6 +69,8 @@ class ReleaseController extends Controller
             'track_songwriter.*' => 'required|string|max:255',
             'track_isrc' => 'nullable|array',
             'track_isrc.*' => 'nullable|string|max:50',
+            'track_genre' => 'nullable|array',
+            'track_genre.*' => 'nullable|string|max:100',
         ];
 
         if ($request->boolean('use_mock_audio')) {
@@ -149,10 +151,19 @@ class ReleaseController extends Controller
                 // Auto-generate ISRC if empty
                 $isrc = $request->track_isrc[$index] ?? 'US-CM1-' . date('y') . '-' . sprintf('%05d', rand(1, 99999));
 
+                // For EP/Album, use per-track genre; for single, inherit from release
+                $trackGenre = null;
+                if ($request->type !== 'single' && isset($request->track_genre[$index])) {
+                    $trackGenre = $request->track_genre[$index];
+                } else {
+                    $trackGenre = $request->genre;
+                }
+
                 Track::create([
                     'release_id' => $release->id,
                     'title' => $trackTitle,
                     'artist_name' => $artist->name,
+                    'genre' => $trackGenre,
                     'composer' => $request->track_composer[$index],
                     'songwriter' => $request->track_songwriter[$index],
                     'isrc' => $isrc,
@@ -165,6 +176,15 @@ class ReleaseController extends Controller
                 'user_id' => $user->id,
                 'action' => 'upload_release',
                 'description' => "Uploaded release '{$release->title}' for review. Fee calculated: $" . number_format($fee, 2) . '.',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            // Notify artist of successful upload
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'upload_success',
+                'description' => "Your release '{$release->title}' ({$release->type}) with " . count($request->track_title) . " track(s) has been uploaded successfully and is now " . ($submitWithoutPayment ? 'awaiting administrator review.' : 'awaiting payment before review.'),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -183,6 +203,16 @@ class ReleaseController extends Controller
 
         } catch (\Exception $e) {
             DB::rollBack();
+
+            // Notify artist of failed upload
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'upload_failed',
+                'description' => "Upload failed for release '{$request->title}'. Reason: " . $e->getMessage(),
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
             return back()->with('error', 'An error occurred while uploading your release: ' . $e->getMessage())->withInput();
         }
     }

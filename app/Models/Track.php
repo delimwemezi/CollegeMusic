@@ -13,6 +13,7 @@ class Track extends Model
         'release_id',
         'title',
         'artist_name',
+        'genre',
         'composer',
         'songwriter',
         'isrc',

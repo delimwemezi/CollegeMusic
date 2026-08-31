@@ -74,8 +74,8 @@
                     </div>
 
                     <div class="form-group">
-                        <label class="form-label" for="genre">Primary Genre</label>
-                        <select id="genre" name="genre" class="form-select" required>
+                        <label class="form-label" for="genre" id="genreLabel">Primary Genre</label>
+                        <select id="genre" name="genre" class="form-select" onchange="syncTrackGenreDefaults()" required>
                             <option value="Pop">Pop</option>
                             <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
                             <option value="Rock">Rock</option>
@@ -85,7 +85,13 @@
                             <option value="Reggae">Reggae</option>
                             <option value="Jazz">Jazz</option>
                             <option value="Classical">Classical</option>
+                            <option value="Bongo Flava">Bongo Flava</option>
+                            <option value="Gospel">Gospel</option>
+                            <option value="Country">Country</option>
+                            <option value="Latin">Latin</option>
+                            <option value="Indie">Indie</option>
                         </select>
+                        <small id="genreHint" style="color: var(--text-muted); font-size: 0.75rem; display: none; margin-top: 0.25rem;">This will be the default genre for all tracks. You can change each track's genre individually in Step 3.</small>
                     </div>
 
                     <div class="form-group">
@@ -192,6 +198,30 @@
                                     <input type="file" name="track_file[]" class="form-input" accept="audio/mp3,audio/wav,audio/flac" required>
                                     <small style="color: var(--text-muted); font-size: 0.75rem;">Supported Formats: MP3, WAV, FLAC (Max 20MB)</small>
                                 </div>
+                            </div>
+
+                            {{-- Per-track genre dropdown (visible only for EP/Album) --}}
+                            <div class="track-genre-group" style="display: none; margin-bottom: 1rem;">
+                                <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fa-solid fa-tags" style="color: var(--primary);"></i> Track Genre / Category
+                                </label>
+                                <select name="track_genre[]" class="form-select track-genre-select">
+                                    <option value="Pop">Pop</option>
+                                    <option value="Hip-Hop/Rap">Hip-Hop/Rap</option>
+                                    <option value="Rock">Rock</option>
+                                    <option value="Electronic/Dance">Electronic/Dance</option>
+                                    <option value="R&B/Soul">R&B/Soul</option>
+                                    <option value="Afrobeats">Afrobeats</option>
+                                    <option value="Reggae">Reggae</option>
+                                    <option value="Jazz">Jazz</option>
+                                    <option value="Classical">Classical</option>
+                                    <option value="Bongo Flava">Bongo Flava</option>
+                                    <option value="Gospel">Gospel</option>
+                                    <option value="Country">Country</option>
+                                    <option value="Latin">Latin</option>
+                                    <option value="Indie">Indie</option>
+                                </select>
+                                <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Choose the genre for this specific track (can differ from the release genre)</small>
                             </div>
 
                             <div class="grid-cols-3" style="margin-bottom: 0;">
@@ -633,6 +663,8 @@
     function adjustTrackLimits() {
         var type = document.getElementById('type').value;
         var addBtn = document.getElementById('addTrackBtn');
+        var genreLabel = document.getElementById('genreLabel');
+        var genreHint = document.getElementById('genreHint');
         
         if (type === 'single') {
             var rows = document.querySelectorAll('.track-row');
@@ -641,8 +673,18 @@
             }
             addBtn.style.display = 'none';
             updateTrackLabels();
+            // Hide per-track genre for singles
+            document.querySelectorAll('.track-genre-group').forEach(function(g) { g.style.display = 'none'; });
+            genreLabel.textContent = 'Primary Genre';
+            genreHint.style.display = 'none';
         } else {
             addBtn.style.display = 'inline-flex';
+            // Show per-track genre for EP/Album
+            document.querySelectorAll('.track-genre-group').forEach(function(g) { g.style.display = 'block'; });
+            genreLabel.textContent = 'Primary Genre (Default for Tracks)';
+            genreHint.style.display = 'block';
+            // Sync defaults
+            syncTrackGenreDefaults();
         }
     }
 
@@ -657,6 +699,8 @@
 
         var container = document.getElementById('tracklistContainer');
         var newId = Date.now();
+        var releaseGenre = document.getElementById('genre').value;
+        var showGenre = (type !== 'single') ? 'block' : 'none';
         var rowHtml = `
             <div class="card track-row" id="trackRow_${newId}" style="margin-bottom: 1rem; border-color: rgba(255,255,255,0.05); animation: fadeIn 0.3s ease;">
                 <div class="card-body" style="padding: 1.25rem;">
@@ -677,6 +721,29 @@
                             <input type="file" name="track_file[]" class="form-input track-audio-input" accept="audio/mp3,audio/wav,audio/flac" required>
                             <small style="color: var(--text-muted); font-size: 0.75rem;">Supported Formats: MP3, WAV, FLAC (Max 20MB)</small>
                         </div>
+                    </div>
+
+                    <div class="track-genre-group" style="display: ${showGenre}; margin-bottom: 1rem;">
+                        <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-tags" style="color: var(--primary);"></i> Track Genre / Category
+                        </label>
+                        <select name="track_genre[]" class="form-select track-genre-select">
+                            <option value="Pop" ${releaseGenre === 'Pop' ? 'selected' : ''}>Pop</option>
+                            <option value="Hip-Hop/Rap" ${releaseGenre === 'Hip-Hop/Rap' ? 'selected' : ''}>Hip-Hop/Rap</option>
+                            <option value="Rock" ${releaseGenre === 'Rock' ? 'selected' : ''}>Rock</option>
+                            <option value="Electronic/Dance" ${releaseGenre === 'Electronic/Dance' ? 'selected' : ''}>Electronic/Dance</option>
+                            <option value="R&B/Soul" ${releaseGenre === 'R&B/Soul' ? 'selected' : ''}>R&B/Soul</option>
+                            <option value="Afrobeats" ${releaseGenre === 'Afrobeats' ? 'selected' : ''}>Afrobeats</option>
+                            <option value="Reggae" ${releaseGenre === 'Reggae' ? 'selected' : ''}>Reggae</option>
+                            <option value="Jazz" ${releaseGenre === 'Jazz' ? 'selected' : ''}>Jazz</option>
+                            <option value="Classical" ${releaseGenre === 'Classical' ? 'selected' : ''}>Classical</option>
+                            <option value="Bongo Flava" ${releaseGenre === 'Bongo Flava' ? 'selected' : ''}>Bongo Flava</option>
+                            <option value="Gospel" ${releaseGenre === 'Gospel' ? 'selected' : ''}>Gospel</option>
+                            <option value="Country" ${releaseGenre === 'Country' ? 'selected' : ''}>Country</option>
+                            <option value="Latin" ${releaseGenre === 'Latin' ? 'selected' : ''}>Latin</option>
+                            <option value="Indie" ${releaseGenre === 'Indie' ? 'selected' : ''}>Indie</option>
+                        </select>
+                        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">Choose the genre for this specific track (can differ from the release genre)</small>
                     </div>
 
                     <div class="grid-cols-3" style="margin-bottom: 0;">
@@ -721,5 +788,26 @@
             deleteBtns.forEach(function(btn) { btn.style.display = 'block'; });
         }
     }
+
+    // Sync all track genre dropdowns that haven't been manually changed to the release genre default
+    function syncTrackGenreDefaults() {
+        var releaseGenre = document.getElementById('genre').value;
+        var type = document.getElementById('type').value;
+        if (type === 'single') return;
+        
+        document.querySelectorAll('.track-genre-select').forEach(function(sel) {
+            // Only auto-sync if user hasn't manually changed it (first load)
+            if (!sel.dataset.userChanged) {
+                sel.value = releaseGenre;
+            }
+        });
+    }
+
+    // Mark track genre dropdowns as manually changed when user interacts
+    document.addEventListener('change', function(e) {
+        if (e.target.classList.contains('track-genre-select')) {
+            e.target.dataset.userChanged = 'true';
+        }
+    });
 </script>
 @endsection

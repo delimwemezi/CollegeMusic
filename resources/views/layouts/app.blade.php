@@ -78,7 +78,7 @@
         $notifications = [];
         if ($user) {
             $notifications = \App\Models\AuditLog::where('user_id', $user->id)
-                ->whereIn('action', ['release_approved', 'release_rejected', 'release_distributed', 'withdrawal_completed', 'withdrawal_rejected', 'payment_completed'])
+                ->whereIn('action', ['release_approved', 'release_rejected', 'release_distributed', 'withdrawal_completed', 'withdrawal_rejected', 'payment_completed', 'upload_success', 'upload_failed'])
                 ->orderBy('created_at', 'desc')
                 ->take(5)
                 ->get();
@@ -243,9 +243,9 @@
                             <div class="dropdown-header">System Notifications</div>
                             @forelse($notifications as $notif)
                                 <div class="dropdown-item">
-                                    @if(str_contains($notif->action, 'approve'))
+                                    @if(str_contains($notif->action, 'approve') || $notif->action === 'upload_success')
                                         <span class="badge-dot" style="background-color: var(--success);"></span>
-                                    @elseif(str_contains($notif->action, 'reject'))
+                                    @elseif(str_contains($notif->action, 'reject') || $notif->action === 'upload_failed')
                                         <span class="badge-dot" style="background-color: var(--danger);"></span>
                                     @elseif(str_contains($notif->action, 'payment') || str_contains($notif->action, 'withdrawal'))
                                         <span class="badge-dot" style="background-color: var(--purple);"></span>

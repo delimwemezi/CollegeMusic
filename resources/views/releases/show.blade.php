@@ -116,7 +116,13 @@
                         <div style="display: flex; justify-content: space-between; align-items: flex-start;">
                             <div>
                                 <span style="color: var(--primary); font-size: 0.8rem; font-weight: 600; text-transform: uppercase;">Track #{{ $index + 1 }}</span>
-                                <h4 style="font-size: 1.05rem; margin-top: 0.15rem;">{{ $track->title }}</h4>
+                                <h4 style="font-size: 1.05rem; margin-top: 0.15rem;">{{ $track->title }}
+                                    @if($track->genre)
+                                        <span style="display: inline-block; font-size: 0.7rem; font-weight: 500; background: linear-gradient(135deg, rgba(59,130,246,0.15), rgba(139,92,246,0.15)); color: var(--primary); padding: 0.15rem 0.6rem; border-radius: 9999px; margin-left: 0.5rem; vertical-align: middle; border: 1px solid rgba(59,130,246,0.2);">
+                                            <i class="fa-solid fa-tag" style="font-size: 0.6rem; margin-right: 0.2rem;"></i>{{ $track->genre }}
+                                        </span>
+                                    @endif
+                                </h4>
                                 <p style="color: var(--text-secondary); font-size: 0.8rem; margin-top: 0.25rem;">
                                     Composer: <strong>{{ $track->composer }}</strong> &bull; Songwriter: <strong>{{ $track->songwriter }}</strong>
                                 </p>

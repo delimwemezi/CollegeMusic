@@ -454,3 +454,93 @@ Stack trace:
 #4 {main}
 "} 
 [2026-07-21 13:44:09] local.INFO: Verification code for User ID 5 (delfinusideusdedith@gmail.com): 929996  
+[2026-08-18 14:51:27] local.ERROR: Maximum execution time of 120 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 120 seconds exceeded at C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/BootProviders.php:20)
+[stacktrace]
+#0 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(252): Symfony/Component/ErrorHandler/Error/FatalError->__construct(message: ''Maximum execut...', code: '0', error: '['type' => 1, '...', traceOffset: '0', traceArgs: '???', trace: '???')
+#1 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(239): Illuminate/Foundation/Bootstrap/HandleExceptions->fatalErrorFromPhpError(error: '['type' => 1, '...', traceOffset: '0')
+#2 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(263): Illuminate/Foundation/Bootstrap/HandleExceptions->handleShutdown()
+#3 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(0): Illuminate/Foundation/Bootstrap/HandleExceptions->{closure:C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php:262-264}()
+#4 {main}
+"} 
+[2026-08-18 14:59:29] local.INFO: Verification code for User ID 6 (noelmsomba0@gmail.com): 505776  
+[2026-08-18 15:15:56] local.ERROR: Maximum execution time of 120 seconds exceeded {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Maximum execution time of 120 seconds exceeded at C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Support/AggregateServiceProvider.php:5)
+[stacktrace]
+#0 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(252): Symfony/Component/ErrorHandler/Error/FatalError->__construct(message: ''Maximum execut...', code: '0', error: '['type' => 1, '...', traceOffset: '0', traceArgs: '???', trace: '???')
+#1 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(239): Illuminate/Foundation/Bootstrap/HandleExceptions->fatalErrorFromPhpError(error: '['type' => 1, '...', traceOffset: '0')
+#2 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(263): Illuminate/Foundation/Bootstrap/HandleExceptions->handleShutdown()
+#3 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(0): Illuminate/Foundation/Bootstrap/HandleExceptions->{closure:C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php:262-264}()
+#4 {main}
+"} 
+[2026-08-18 15:16:02] local.ERROR: Target class [view] does not exist. {"exception":"[object] (Illuminate\\Contracts\\Container\\BindingResolutionException(code: 0): Target class [view] does not exist. at C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php:1127)
+[stacktrace]
+#0 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(936): Illuminate/Container/Container->build('view')
+#1 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1078): Illuminate/Container/Container->resolve('view', Array, true)
+#2 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(864): Illuminate/Foundation/Application->resolve('view', Array)
+#3 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1058): Illuminate/Container/Container->make('view', Array)
+#4 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(1810): Illuminate/Foundation/Application->make('view')
+#5 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Routing/RoutingServiceProvider.php(181): Illuminate/Container/Container->offsetGet('Illuminate//Cont...')
+#6 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(1118): Illuminate/Routing/RoutingServiceProvider->{closure:Illuminate/Routing/RoutingServiceProvider::registerResponseFactory():180}(Object(Illuminate/Foundation/Application), Array)
+#7 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(936): Illuminate/Container/Container->build(Object(Closure))
+#8 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1078): Illuminate/Container/Container->resolve('Illuminate//Cont...', Array, true)
+#9 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(864): Illuminate/Foundation/Application->resolve('Illuminate//Cont...', Array)
+#10 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1058): Illuminate/Container/Container->make('Illuminate//Cont...', Array)
+#11 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php(138): Illuminate/Foundation/Application->make('Illuminate//Cont...', Array)
+#12 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php(850): app('Illuminate//Cont...')
+#13 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(1092): response('<!-- Maximum ex...', 500, Array)
+#14 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(942): Illuminate/Foundation/Exceptions/Handler->toIlluminateResponse(Object(Symfony/Component/HttpFoundation/Response), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#15 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(833): Illuminate/Foundation/Exceptions/Handler->prepareResponse(Object(Illuminate/Http/Request), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#16 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(720): Illuminate/Foundation/Exceptions/Handler->renderExceptionResponse(Object(Illuminate/Http/Request), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#17 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(226): Illuminate/Foundation/Exceptions/Handler->render(Object(Illuminate/Http/Request), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#18 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(203): Illuminate/Foundation/Bootstrap/HandleExceptions->renderHttpResponse(Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#19 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(239): Illuminate/Foundation/Bootstrap/HandleExceptions->handleException(Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#20 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(263): Illuminate/Foundation/Bootstrap/HandleExceptions->handleShutdown()
+#21 [internal function]: Illuminate/Foundation/Bootstrap/HandleExceptions->{closure:Illuminate/Foundation/Bootstrap/HandleExceptions::forwardsTo():262}()
+#22 {main}
+
+[previous exception] [object] (ReflectionException(code: -1): Class \"view\" does not exist at C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php:1125)
+[stacktrace]
+#0 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(1125): ReflectionClass->__construct('view')
+#1 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(936): Illuminate/Container/Container->build('view')
+#2 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1078): Illuminate/Container/Container->resolve('view', Array, true)
+#3 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(864): Illuminate/Foundation/Application->resolve('view', Array)
+#4 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1058): Illuminate/Container/Container->make('view', Array)
+#5 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(1810): Illuminate/Foundation/Application->make('view')
+#6 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Routing/RoutingServiceProvider.php(181): Illuminate/Container/Container->offsetGet('Illuminate//Cont...')
+#7 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(1118): Illuminate/Routing/RoutingServiceProvider->{closure:Illuminate/Routing/RoutingServiceProvider::registerResponseFactory():180}(Object(Illuminate/Foundation/Application), Array)
+#8 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(936): Illuminate/Container/Container->build(Object(Closure))
+#9 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1078): Illuminate/Container/Container->resolve('Illuminate//Cont...', Array, true)
+#10 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Container/Container.php(864): Illuminate/Foundation/Application->resolve('Illuminate//Cont...', Array)
+#11 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1058): Illuminate/Container/Container->make('Illuminate//Cont...', Array)
+#12 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php(138): Illuminate/Foundation/Application->make('Illuminate//Cont...', Array)
+#13 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/helpers.php(850): app('Illuminate//Cont...')
+#14 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(1092): response('<!-- Maximum ex...', 500, Array)
+#15 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(942): Illuminate/Foundation/Exceptions/Handler->toIlluminateResponse(Object(Symfony/Component/HttpFoundation/Response), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#16 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(833): Illuminate/Foundation/Exceptions/Handler->prepareResponse(Object(Illuminate/Http/Request), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#17 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Exceptions/Handler.php(720): Illuminate/Foundation/Exceptions/Handler->renderExceptionResponse(Object(Illuminate/Http/Request), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#18 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(226): Illuminate/Foundation/Exceptions/Handler->render(Object(Illuminate/Http/Request), Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#19 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(203): Illuminate/Foundation/Bootstrap/HandleExceptions->renderHttpResponse(Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#20 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(239): Illuminate/Foundation/Bootstrap/HandleExceptions->handleException(Object(Symfony/Component/ErrorHandler/Error/FatalError))
+#21 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Bootstrap/HandleExceptions.php(263): Illuminate/Foundation/Bootstrap/HandleExceptions->handleShutdown()
+#22 [internal function]: Illuminate/Foundation/Bootstrap/HandleExceptions->{closure:Illuminate/Foundation/Bootstrap/HandleExceptions::forwardsTo():262}()
+#23 {main}
+"} 
+[2026-08-24 15:43:32] local.INFO: Recovery code for User ID 5: 977759  
+[2026-08-24 15:46:00] local.INFO: Recovery code for User ID 6: 179722  
+[2026-08-24 16:28:10] local.INFO: Verification code for User ID 7 (stephanmathew45@gmail.com): 385957  
+[2026-08-31 13:08:53] local.ERROR: Command "server" is not defined.
+
+Did you mean one of these?
+    make:observer
+    serve {"exception":"[object] (Symfony\\Component\\Console\\Exception\\CommandNotFoundException(code: 0): Command \"server\" is not defined.
+
+Did you mean one of these?
+    make:observer
+    serve at C:/wamp64/www/College-Music/vendor/symfony/console/Application.php:785)
+[stacktrace]
+#0 C:/wamp64/www/College-Music/vendor/symfony/console/Application.php(321): Symfony/Component/Console/Application->find('server')
+#1 C:/wamp64/www/College-Music/vendor/symfony/console/Application.php(218): Symfony/Component/Console/Application->doRun(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#2 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Console/Kernel.php(198): Symfony/Component/Console/Application->run(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#3 C:/wamp64/www/College-Music/vendor/laravel/framework/src/Illuminate/Foundation/Application.php(1235): Illuminate/Foundation/Console/Kernel->handle(Object(Symfony/Component/Console/Input/ArgvInput), Object(Symfony/Component/Console/Output/ConsoleOutput))
+#4 C:/wamp64/www/College-Music/artisan(16): Illuminate/Foundation/Application->handleCommand(Object(Symfony/Component/Console/Input/ArgvInput))
+#5 {main}
+"} 
