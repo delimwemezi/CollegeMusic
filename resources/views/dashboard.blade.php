@@ -92,9 +92,9 @@
         <div class="card-body" style="padding: 0;">
             @forelse($notifications as $notif)
                 <div style="padding: 1rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; align-items: flex-start; gap: 1rem; animation: fadeIn 0.3s ease;">
-                    @if(str_contains($notif->action, 'approve'))
+                    @if(str_contains($notif->action, 'approve') || $notif->action === 'upload_success')
                         <div style="background-color: rgba(16, 185, 129, 0.1); color: var(--success); padding: 0.5rem; border-radius: var(--radius-sm);"><i class="fa-solid fa-circle-check"></i></div>
-                    @elseif(str_contains($notif->action, 'reject'))
+                    @elseif(str_contains($notif->action, 'reject') || $notif->action === 'upload_failed')
                         <div style="background-color: rgba(239, 68, 68, 0.1); color: var(--danger); padding: 0.5rem; border-radius: var(--radius-sm);"><i class="fa-solid fa-triangle-exclamation"></i></div>
                     @else
                         <div style="background-color: rgba(59, 130, 246, 0.1); color: var(--primary); padding: 0.5rem; border-radius: var(--radius-sm);"><i class="fa-solid fa-info"></i></div>
@@ -102,9 +102,11 @@
                     
                     <div style="flex: 1;">
                         <h4 style="font-size: 0.875rem; color: var(--text-primary); font-weight: 600;">
-                            @if($notif->action === 'release_approved') Release Approved
-                            @elseif($notif->action === 'release_rejected') Release Rejected
-                            @elseif($notif->action === 'release_distributed') Release Ingested / Distributed
+                            @if($notif->action === 'upload_success') Upload Submitted (Review Pending)
+                            @elseif($notif->action === 'upload_failed') Upload Failed
+                            @elseif($notif->action === 'release_approved') Release Approved (Confirmed)
+                            @elseif($notif->action === 'release_rejected') Changes Requested / Review Update
+                            @elseif($notif->action === 'release_distributed') Release Distributed (Live)
                             @elseif($notif->action === 'withdrawal_completed') Payout Approved & Paid
                             @elseif($notif->action === 'withdrawal_rejected') Payout Request Rejected
                             @else Notification Alert

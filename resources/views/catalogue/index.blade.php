@@ -97,7 +97,7 @@
                                         @elseif($release->distribution_status === 'distributed')
                                             <span class="badge badge-distributed">Distributed</span>
                                         @elseif($release->distribution_status === 'rejected')
-                                            <span class="badge badge-rejected" title="Reason: {{ $release->rejection_reason }}">Rejected</span>
+                                            <span class="badge badge-rejected" title="Reason: {{ $release->rejection_reason }}">Changes Requested</span>
                                         @endif
                                     </td>
                                     <td style="text-align: right; vertical-align: middle;">
@@ -109,7 +109,7 @@
                                             <!-- Allow edit if pending/rejected and unpaid or not fully approved -->
                                             @if(($release->distribution_status === 'pending' || $release->distribution_status === 'rejected'))
                                                 <a href="{{ route('releases.edit', $release->id) }}" class="btn btn-primary btn-sm" style="background-color: var(--accent); border-color: var(--accent);">
-                                                    <i class="fa-solid fa-pen"></i> Edit
+                                                    <i class="fa-solid fa-pen"></i> Edit / Re-Upload
                                                 </a>
                                             @endif
 
@@ -129,9 +129,10 @@
                                 @if($release->distribution_status === 'rejected' && $release->rejection_reason)
                                     <tr style="background-color: rgba(239, 68, 68, 0.03);">
                                         <td colspan="9" style="padding: 0.75rem 1.5rem; font-size: 0.85rem; border-top: none;">
-                                            <div style="color: #fca5a5; display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="color: #fca5a5; display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
                                                 <i class="fa-solid fa-circle-info"></i>
-                                                <strong>Rejection Reason:</strong> {{ $release->rejection_reason }} (You can edit details and submit again)
+                                                <strong>Admin Feedback & Suggested Changes:</strong> {{ $release->rejection_reason }}
+                                                <a href="{{ route('releases.edit', $release->id) }}" style="color: #60a5fa; text-decoration: underline; margin-left: 0.5rem; font-weight: 500;">Edit & Upload Again for Review &rarr;</a>
                                             </div>
                                         </td>
                                     </tr>

@@ -9,6 +9,7 @@ use App\Models\ReleaseStore;
 use App\Models\Payment;
 use App\Models\AuditLog;
 use App\Models\User;
+use App\Services\ReleaseQualityControlService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -180,11 +181,11 @@ class ReleaseController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
-            // Notify artist of successful upload
+            // Notify artist that upload succeeded and is waiting for admin review
             AuditLog::create([
                 'user_id' => $user->id,
                 'action' => 'upload_success',
-                'description' => "Your release '{$release->title}' ({$release->type}) with " . count($request->track_title) . " track(s) has been uploaded successfully and is now " . ($submitWithoutPayment ? 'awaiting administrator review.' : 'awaiting payment before review.'),
+                'description' => "Upload successful! Your release '{$release->title}' ({$release->type}) with " . count($request->track_title) . " track(s) has been uploaded and is waiting for review and approval from an administrator.",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -195,25 +196,32 @@ class ReleaseController extends Controller
 
             DB::commit();
 
-            if (!$submitWithoutPayment) {
-                return redirect()->route('releases.show', $release->id)->with('info', 'Release uploaded! Please process the distribution fee payment to submit for review.');
+            // Run automated file, artwork, audio, and metadata quality control
+            $qc = ReleaseQualityControlService::inspectAndProcess($release, $request);
+
+            if ($qc['passed']) {
+                if ($submitWithoutPayment) {
+                    return redirect()->route('releases.show', $release->id)->with('success', 'Automated Quality Inspection Passed! Your release has met all store standards and has been automatically approved and distributed.');
+                } else {
+                    return redirect()->route('releases.show', $release->id)->with('info', 'Automated Quality Inspection Passed! Please complete payment to finalize distribution to digital streaming platforms.');
+                }
             } else {
-                return redirect()->route('releases.show', $release->id)->with('success', 'Release uploaded and submitted for administrator review.');
+                return redirect()->route('releases.show', $release->id)->with('error', 'Automated Quality Inspection detected ' . count($qc['errors']) . ' issue(s). Please review the feedback below, correct the files/details, and re-upload.');
             }
 
         } catch (\Exception $e) {
             DB::rollBack();
 
-            // Notify artist of failed upload
+            // Notify artist that upload failed
             AuditLog::create([
                 'user_id' => $user->id,
                 'action' => 'upload_failed',
-                'description' => "Upload failed for release '{$request->title}'. Reason: " . $e->getMessage(),
+                'description' => "Music upload failed for release '{$request->title}'. Reason: " . $e->getMessage(),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
 
-            return back()->with('error', 'An error occurred while uploading your release: ' . $e->getMessage())->withInput();
+            return back()->with('error', 'Music upload failed: ' . $e->getMessage())->withInput();
         }
     }
 
@@ -293,18 +301,27 @@ class ReleaseController extends Controller
         AuditLog::create([
             'user_id' => $user->id,
             'action' => 'edit_release',
-            'description' => "Edited release metadata for '{$release->title}'. Status reset to Pending.",
+            'description' => "Updated release details for '{$release->title}'. Re-running automated quality inspection.",
             'ip_address' => $request->ip(),
             'user_agent' => $request->userAgent()
         ]);
 
         if ($release->billing_status === 'paid') {
             $this->notifyAdminsOfSubmission($release, $request);
-
-            return redirect()->route('releases.show', $release->id)->with('success', 'Release updated and resubmitted for administrator review.');
         }
 
-        return redirect()->route('releases.show', $release->id)->with('info', 'Release updated. Complete payment to submit it for administrator review.');
+        // Run automated QC on updated details
+        $qc = ReleaseQualityControlService::inspectAndProcess($release, $request);
+
+        if ($qc['passed']) {
+            if ($release->billing_status === 'paid') {
+                return redirect()->route('releases.show', $release->id)->with('success', 'Release updated and passed automated quality check! It has been automatically confirmed and distributed.');
+            } else {
+                return redirect()->route('releases.show', $release->id)->with('info', 'Release updated and passed quality inspection! Complete payment to finalize distribution.');
+            }
+        } else {
+            return redirect()->route('releases.show', $release->id)->with('error', 'Automated Quality Inspection detected ' . count($qc['errors']) . ' issue(s) in the updated details. Please review the errors below and correct them.');
+        }
     }
 
     public function takedown(Release $release)
@@ -349,7 +366,7 @@ class ReleaseController extends Controller
             'card_name' => 'required|string',
             'card_number' => 'required|string|min:16',
             'card_expiry' => 'required|string',
-            'card_cvc' => 'required|string|min:3',
+            'card_cvc' => 'required|string|min:3|max:4',
         ]);
 
         // Calculate distribution fee
@@ -357,17 +374,10 @@ class ReleaseController extends Controller
         if ($release->type === 'ep') $fee = 19.99;
         if ($release->type === 'album') $fee = 29.99;
 
-        // Verify it isn't exempt
-        $hasPremium = $user->subscription && $user->subscription->plan_name === 'Premium' && $user->subscription->status === 'active' && $user->subscription->ends_at->isAfter(now());
-        if ($hasPremium) {
-            $fee = 0.00;
-        }
-
         DB::beginTransaction();
         try {
             $release->billing_status = 'paid';
             $release->price_paid = $fee;
-            $release->distribution_status = 'pending';
             $release->save();
 
             // Create Payment record
@@ -396,7 +406,14 @@ class ReleaseController extends Controller
 
             DB::commit();
 
-            return redirect()->route('releases.show', $release->id)->with('success', 'Payment processed successfully! Your music has been submitted for admin review.');
+            // Run automated QC & Distribution
+            $qc = ReleaseQualityControlService::inspectAndProcess($release, $request);
+
+            if ($qc['passed']) {
+                return redirect()->route('releases.show', $release->id)->with('success', 'Payment processed and Automated QC passed! Your release has been confirmed and distributed live to streaming stores.');
+            } else {
+                return redirect()->route('releases.show', $release->id)->with('warning', 'Payment received, but Automated QC detected issues with your files. Please check the feedback below and update your details.');
+            }
 
         } catch (\Exception $e) {
             DB::rollBack();

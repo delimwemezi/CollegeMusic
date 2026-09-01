@@ -10,6 +10,7 @@ use App\Models\Payment;
 use App\Models\Withdrawal;
 use App\Models\AuditLog;
 use App\Models\SystemSetting;
+use App\Services\ReleaseQualityControlService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -109,9 +110,18 @@ class AdminController extends Controller
     public function reviewRelease(Request $request, Release $release)
     {
         $request->validate([
-            'action' => 'required|string|in:approve,reject,distribute',
+            'action' => 'required|string|in:approve,reject,distribute,auto_qc',
             'rejection_reason' => 'required_if:action,reject|nullable|string',
         ]);
+
+        if ($request->action === 'auto_qc') {
+            $qc = ReleaseQualityControlService::inspectAndProcess($release, $request);
+            if ($qc['passed']) {
+                return back()->with('success', "Automated Quality Inspection Passed! Release '{$release->title}' has been auto-approved and distributed.");
+            } else {
+                return back()->with('warning', "Automated Quality Inspection detected " . count($qc['errors']) . " issue(s) for '{$release->title}'. Feedback automatically sent to artist.");
+            }
+        }
 
         if ($request->action === 'approve' && $release->distribution_status !== 'pending') {
             return back()->with('error', 'Only releases submitted for review can be approved or rejected.');
@@ -134,7 +144,7 @@ class AdminController extends Controller
             AuditLog::create([
                 'user_id' => $release->artist->user_id,
                 'action' => 'release_approved',
-                'description' => "Your release '{$release->title}' has been approved for distribution!",
+                'description' => "Confirmed: Your release '{$release->title}' has been reviewed & approved by administrator! It is ready for distribution to digital streaming platforms.",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -148,7 +158,7 @@ class AdminController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
-            return back()->with('success', "Release '{$release->title}' has been approved.");
+            return back()->with('success', "Confirmed: Release '{$release->title}' has been approved and is ready for distribution.");
         } 
         
         if ($request->action === 'reject') {
@@ -156,11 +166,11 @@ class AdminController extends Controller
             $release->rejection_reason = $request->rejection_reason;
             $release->save();
 
-            // Create notification alert for artist
+            // Create notification alert for artist with suggested details/changes
             AuditLog::create([
                 'user_id' => $release->artist->user_id,
                 'action' => 'release_rejected',
-                'description' => "Your release '{$release->title}' was rejected. Reason: {$request->rejection_reason}",
+                'description' => "Review Update: Your release '{$release->title}' requires updates before approval. Suggested changes: {$request->rejection_reason}. Please edit details and upload again for review.",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -168,12 +178,12 @@ class AdminController extends Controller
             AuditLog::create([
                 'user_id' => Auth::id(),
                 'action' => 'admin_reject_release',
-                'description' => "Rejected release '{$release->title}'. Reason: {$request->rejection_reason}",
+                'description' => "Rejected release '{$release->title}'. Reason / Suggested Changes: {$request->rejection_reason}",
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
 
-            return back()->with('success', "Release '{$release->title}' has been rejected.");
+            return back()->with('warning', "Release '{$release->title}' review submitted. Suggested changes have been sent to the artist to edit and upload again for review.");
         }
 
         if ($request->action === 'distribute') {
@@ -232,7 +242,7 @@ class AdminController extends Controller
             AuditLog::create([
                 'user_id' => $release->artist->user_id,
                 'action' => 'release_distributed',
-                'description' => "Distribution completed! Your release '{$release->title}' is now live on digital platforms. " . ($apiSuccess ? "(API Transmitted)" : "(Simulated Fallback)"),
+                'description' => "Distributed: Your release '{$release->title}' has been confirmed and distributed live across all selected streaming platforms (Spotify, Apple Music, YouTube Music, etc.)! " . ($apiSuccess ? "(API Transmitted)" : "(Simulated Fallback)"),
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
@@ -245,7 +255,7 @@ class AdminController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
-            return back()->with('success', "Release '{$release->title}' has been successfully distributed to streaming platforms! API Call Log: " . $apiMessage);
+            return back()->with('success', "Confirmed: Release '{$release->title}' has been successfully distributed to streaming platforms!");
         }
 
         return back()->with('error', 'Invalid review action.');

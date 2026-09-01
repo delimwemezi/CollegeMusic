@@ -35,7 +35,7 @@ class DatabaseSeeder extends Seeder
         'email_verified_at' => now(),
         'phone_verified_at' => now(),
     ]
-);
+     );
 
         $systemAdmin = User::updateOrCreate(
             ['email' => 'admin@collegemusic.com'],

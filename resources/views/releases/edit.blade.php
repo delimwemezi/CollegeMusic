@@ -21,6 +21,17 @@
         <h3 class="card-title"><i class="fa-solid fa-pen-to-square"></i> Release Details</h3>
     </div>
     <div class="card-body">
+        @if($release->distribution_status === 'rejected' && $release->rejection_reason)
+            <div class="alert alert-warning" style="margin-bottom: 1.5rem; background-color: rgba(245, 158, 11, 0.1); border-color: rgba(245, 158, 11, 0.25); color: #fcd34d;">
+                <i class="fa-solid fa-triangle-exclamation" style="font-size: 1.25rem;"></i>
+                <div>
+                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Admin Review Feedback & Suggested Changes:</h4>
+                    <p style="font-size: 0.9rem; margin: 0; color: #fff;">{{ $release->rejection_reason }}</p>
+                    <small style="color: var(--text-muted); display: block; margin-top: 0.25rem;">Please make the requested adjustments below and submit to upload again for review.</small>
+                </div>
+            </div>
+        @endif
+
         <form action="{{ route('releases.update', $release->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             

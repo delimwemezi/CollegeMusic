@@ -65,9 +65,9 @@ class DashboardController extends Controller
             $showVerificationWarning = ($user->status === 'active' && !Artist::where('user_id', $user->id)->exists());
         }
 
-        // Notifications (alerts generated for user, e.g. release reviews, payout reviews)
+        // Notifications (alerts generated for user, e.g. release reviews, payout reviews, upload status)
         $notifications = AuditLog::where('user_id', $user->id)
-            ->whereIn('action', ['release_approved', 'release_rejected', 'release_distributed', 'withdrawal_completed', 'withdrawal_rejected', 'payment_completed'])
+            ->whereIn('action', ['release_approved', 'release_rejected', 'release_distributed', 'withdrawal_completed', 'withdrawal_rejected', 'payment_completed', 'upload_success', 'upload_failed'])
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();

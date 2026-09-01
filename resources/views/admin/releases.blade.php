@@ -109,8 +109,16 @@
                                                 </button>
                                             </form>
                                             
+                                            <form action="{{ route('admin.releases.review', $release->id) }}" method="POST" style="margin: 0;">
+                                                @csrf
+                                                <input type="hidden" name="action" value="auto_qc">
+                                                <button type="submit" class="btn btn-secondary btn-sm btn-block" style="background-color: rgba(59, 130, 246, 0.1); border-color: rgba(59, 130, 246, 0.2); color: #93c5fd;" title="Automatically check files, artwork & metadata for errors">
+                                                    <i class="fa-solid fa-wand-magic-sparkles"></i> Run Auto QC
+                                                </button>
+                                            </form>
+                                            
                                             <button type="button" class="btn btn-danger btn-sm btn-block" style="background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5;" onclick="showRejectionInput('{{ $release->id }}')">
-                                                <i class="fa-solid fa-circle-xmark"></i> Reject Release
+                                                <i class="fa-solid fa-circle-xmark"></i> Reject / Request Changes
                                             </button>
                                         </div>
 
@@ -119,11 +127,11 @@
                                             <form action="{{ route('admin.releases.review', $release->id) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="action" value="reject">
-                                                <label class="form-label" style="font-size: 0.75rem;">Reason for Rejection</label>
-                                                <textarea name="rejection_reason" class="form-textarea" rows="2" style="font-size: 0.8rem; padding: 0.4rem;" placeholder="e.g. Low quality cover art or duplicate track metadata." required></textarea>
+                                                <label class="form-label" style="font-size: 0.75rem;">Suggested Details & Changes / Reason</label>
+                                                <textarea name="rejection_reason" class="form-textarea" rows="2" style="font-size: 0.8rem; padding: 0.4rem;" placeholder="e.g. Please provide high-resolution cover artwork or correct track title spelling before re-uploading." required></textarea>
                                                 <div style="display: flex; gap: 0.25rem; justify-content: flex-end; margin-top: 0.5rem;">
                                                     <button type="button" class="btn btn-secondary btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;" onclick="hideRejectionInput('{{ $release->id }}')">Cancel</button>
-                                                    <button type="submit" class="btn btn-danger btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Submit</button>
+                                                    <button type="submit" class="btn btn-danger btn-sm" style="padding: 0.25rem 0.5rem; font-size: 0.75rem;">Send Feedback</button>
                                                 </div>
                                             </form>
                                         </div>

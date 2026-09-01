@@ -92,14 +92,38 @@
 
     <!-- Tracks & Billing/Payment Panels -->
     <div style="grid-column: span 2;">
-        @if($release->distribution_status === 'rejected' && $release->rejection_reason)
+        @if($release->distribution_status === 'pending')
+            <div class="alert alert-warning" style="margin-bottom: 1.5rem; background-color: rgba(59, 130, 246, 0.08); border-color: rgba(59, 130, 246, 0.2); color: #93c5fd;">
+                <i class="fa-solid fa-clock" style="font-size: 1.25rem; color: var(--primary);"></i>
+                <div>
+                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Music Upload Completed &bull; Waiting for Review</h4>
+                    <p style="font-size: 0.85rem; margin: 0;">Your release metadata and tracks have been uploaded successfully. It is currently waiting for administrator review and approval.</p>
+                </div>
+            </div>
+        @elseif($release->distribution_status === 'approved')
+            <div class="alert alert-success" style="margin-bottom: 1.5rem;">
+                <i class="fa-solid fa-circle-check" style="font-size: 1.25rem;"></i>
+                <div>
+                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Confirmed & Approved for Distribution</h4>
+                    <p style="font-size: 0.85rem; margin: 0;">This release has been reviewed and approved by administrators and is queued for distribution to digital platforms.</p>
+                </div>
+            </div>
+        @elseif($release->distribution_status === 'distributed')
+            <div class="alert alert-success" style="margin-bottom: 1.5rem; background-color: rgba(16, 185, 129, 0.08); border-color: rgba(16, 185, 129, 0.2); color: #6ee7b7;">
+                <i class="fa-solid fa-tower-broadcast" style="font-size: 1.25rem;"></i>
+                <div>
+                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Confirmed & Distributed</h4>
+                    <p style="font-size: 0.85rem; margin: 0;">Distribution completed! Your release is actively live across all selected digital streaming platforms.</p>
+                </div>
+            </div>
+        @elseif($release->distribution_status === 'rejected' && $release->rejection_reason)
             <div class="alert alert-danger" style="margin-bottom: 1.5rem;">
                 <i class="fa-solid fa-circle-exclamation" style="font-size: 1.25rem;"></i>
                 <div>
-                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Release Rejected by Administrator</h4>
-                    <p style="font-size: 0.85rem;">{{ $release->rejection_reason }}</p>
-                    <a href="{{ route('releases.edit', $release->id) }}" class="btn btn-secondary btn-sm" style="margin-top: 0.75rem; background-color: var(--bg-card); color: #fff; border-color: var(--border-color);">
-                        <i class="fa-solid fa-pen"></i> Edit Release to Correct Details
+                    <h4 style="font-weight: 600; margin-bottom: 0.25rem;">Suggested Changes / Review Feedback</h4>
+                    <p style="font-size: 0.85rem; margin-bottom: 0.5rem;">{{ $release->rejection_reason }}</p>
+                    <a href="{{ route('releases.edit', $release->id) }}" class="btn btn-secondary btn-sm" style="margin-top: 0.25rem; background-color: var(--bg-card); color: #fff; border-color: var(--border-color);">
+                        <i class="fa-solid fa-pen"></i> Edit Details & Upload Again for Review
                     </a>
                 </div>
             </div>
