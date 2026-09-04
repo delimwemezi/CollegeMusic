@@ -33,6 +33,21 @@
             </div>
         </div>
 
+        <!-- Server-side Errors Banner -->
+        @if($errors->any())
+            <div class="alert alert-danger animate-fade-up" style="margin-bottom: 1.5rem;">
+                <i class="fa-solid fa-circle-exclamation" style="font-size: 1.2rem;"></i>
+                <div>
+                    <strong>Please correct the following errors:</strong>
+                    <ul style="margin: 0.25rem 0 0 1rem; padding: 0; font-size: 0.85rem;">
+                        @foreach($errors->all() as $err)
+                            <li>{{ $err }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
         <!-- Validation Alert Banner -->
         <div id="wizardAlertBox" class="alert alert-danger animate-fade-up" style="display: none; margin-bottom: 1.5rem;">
             <i class="fa-solid fa-circle-exclamation" style="font-size: 1.2rem;"></i>
@@ -113,7 +128,7 @@
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; margin-top: 2rem;">
-                    <button type="button" class="btn btn-primary" onclick="goToStep(2)">
+                    <button type="button" class="btn btn-primary wizard-step-button" data-step-target="2">
                         Next Step <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
@@ -159,10 +174,10 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
-                    <button type="button" class="btn btn-secondary" onclick="goToStep(1)">
+                    <button type="button" class="btn btn-secondary wizard-step-button" data-step-target="1">
                         <i class="fa-solid fa-arrow-left"></i> Previous
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="goToStep(3)">
+                    <button type="button" class="btn btn-primary wizard-step-button" data-step-target="3">
                         Next Step <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
@@ -199,6 +214,20 @@
                                     <small style="color: var(--text-muted); font-size: 0.75rem;">Supported Formats: MP3, WAV, FLAC (Max 20MB)</small>
                                 </div>
                             </div>
+
+                            {{-- Per-track Artist Name (always shown for Record Labels) --}}
+                            @if(auth()->user()->isRecordLabel())
+                            <div class="form-group track-artist-name-group" style="margin-bottom: 1rem;">
+                                <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <i class="fa-solid fa-microphone" style="color: var(--primary);"></i> Track Artist Name
+                                </label>
+                                <input type="text" name="track_artist_name[]" class="form-input" placeholder="e.g. Wizkid, Davido, CKay..." required>
+                                <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">The featured / primary artist name for this specific track</small>
+                            </div>
+                            @else
+                            {{-- Hidden pre-filled artist name for regular artist accounts --}}
+                            <input type="hidden" name="track_artist_name[]" value="{{ auth()->user()->artist->art_name ?? auth()->user()->artist->name ?? auth()->user()->art_name ?? auth()->user()->name }}">
+                            @endif
 
                             {{-- Per-track genre dropdown (visible only for EP/Album) --}}
                             <div class="track-genre-group" style="display: none; margin-bottom: 1rem;">
@@ -243,10 +272,10 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
-                    <button type="button" class="btn btn-secondary" onclick="goToStep(2)">
+                    <button type="button" class="btn btn-secondary wizard-step-button" data-step-target="2">
                         <i class="fa-solid fa-arrow-left"></i> Previous
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="goToStep(4)">
+                    <button type="button" class="btn btn-primary wizard-step-button" data-step-target="4">
                         Next Step <i class="fa-solid fa-arrow-right"></i>
                     </button>
                 </div>
@@ -296,10 +325,10 @@
                 </div>
 
                 <div style="display: flex; justify-content: space-between; margin-top: 2rem;">
-                    <button type="button" class="btn btn-secondary" onclick="goToStep(3)">
+                    <button type="button" class="btn btn-secondary wizard-step-button" data-step-target="3">
                         <i class="fa-solid fa-arrow-left"></i> Previous
                     </button>
-                    <button type="submit" class="btn btn-success">
+                    <button type="submit" id="submitReleaseBtn" class="btn btn-success">
                         <i class="fa-solid fa-circle-check"></i> Submit Release
                     </button>
                 </div>
@@ -316,6 +345,13 @@
 
     // Remove validation errors when user types or changes an input
     document.addEventListener('DOMContentLoaded', function() {
+        document.querySelectorAll('.wizard-step-button').forEach(function(button) {
+            button.addEventListener('click', function(event) {
+                event.preventDefault();
+                goToStep(Number(button.dataset.stepTarget));
+            });
+        });
+
         var form = document.getElementById('distributionForm');
         if (form) {
             form.addEventListener('input', function(e) {
@@ -337,17 +373,80 @@
                 }
             });
 
-            // Prevent form submit if any step has incomplete/invalid information
+            // Handle submission via AJAX with full validation and progress state
             form.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // Validate each step 1 to 4 sequentially
                 for (var s = 1; s <= 4; s++) {
                     if (!validateStep(s)) {
-                        e.preventDefault();
                         if (currentStep !== s) {
                             switchStepDisplay(s);
                         }
                         return false;
                     }
                 }
+
+                var submitBtn = document.getElementById('submitReleaseBtn');
+                var originalHtml = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Uploading & Analyzing Release...';
+
+                var formData = new FormData(form);
+
+                fetch(form.action, {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    }
+                })
+                .then(function(res) {
+                    var contentType = res.headers.get('content-type') || '';
+                    if (contentType.indexOf('application/json') !== -1) {
+                        return res.json().then(function(data) {
+                            return { status: res.status, ok: res.ok, data: data };
+                        });
+                    } else {
+                        // If browser followed a 302 redirect to a show page
+                        if (res.redirected && res.url && res.url.indexOf('/releases/') !== -1 && res.url.indexOf('/create') === -1) {
+                            window.location.href = res.url;
+                            return { redirected: true };
+                        }
+                        return res.text().then(function(text) {
+                            var parser = new DOMParser();
+                            var doc = parser.parseFromString(text, 'text/html');
+                            var alert = doc.querySelector('.alert') || doc.querySelector('.invalid-feedback') || doc.querySelector('title');
+                            var msg = alert ? alert.textContent.trim() : 'Server returned an unexpected response. Please ensure all fields are filled.';
+                            return { status: res.status, ok: res.ok, data: { message: msg } };
+                        });
+                    }
+                })
+                .then(function(result) {
+                    if (result.redirected) return;
+                    if (result.ok && result.data && result.data.redirect) {
+                        submitBtn.innerHTML = '<i class="fa-solid fa-check"></i> Upload Completed! Redirecting...';
+                        window.location.href = result.data.redirect;
+                    } else {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalHtml;
+                        var errorMsg = (result.data && result.data.message) ? result.data.message : 'An error occurred during release upload. Please check all fields.';
+                        if (result.data && result.data.errors) {
+                            var firstKey = Object.keys(result.data.errors)[0];
+                            if (result.data.errors[firstKey] && result.data.errors[firstKey][0]) {
+                                errorMsg = result.data.errors[firstKey][0];
+                            }
+                        }
+                        showStepNotification(errorMsg);
+                    }
+                })
+                .catch(function(err) {
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = originalHtml;
+                    showStepNotification('Upload error: ' + (err.message || 'Server connection failed. Please ensure file sizes are within allowed limits.'));
+                });
             });
         }
     });
@@ -533,6 +632,13 @@
                     showStepError(songwriterInput, 'Step 3: Please enter the songwriter name for Track #' + trackNum + '.');
                     return false;
                 }
+
+                // Validate per-track artist name for record label users (visible field)
+                var artistNameInput = row.querySelector('input[name="track_artist_name[]"]');
+                if (artistNameInput && artistNameInput.type !== 'hidden' && !artistNameInput.value.trim()) {
+                    showStepError(artistNameInput, 'Step 3: Please enter the artist name for Track #' + trackNum + '.');
+                    return false;
+                }
             }
 
             return true;
@@ -691,6 +797,8 @@
     function addTrackRow() {
         var type = document.getElementById('type').value;
         var rows = document.querySelectorAll('.track-row');
+        var isRecordLabel = {{ auth()->user()->isRecordLabel() ? 'true' : 'false' }};
+        var defaultArtistName = {{ json_encode(auth()->user()->artist->art_name ?? auth()->user()->artist->name ?? auth()->user()->art_name ?? auth()->user()->name) }};
         
         if (type === 'ep' && rows.length >= 6) {
             showStepNotification('An EP cannot have more than 6 tracks. To add more tracks, change Release Type to Album in Step 1.');
@@ -722,6 +830,16 @@
                             <small style="color: var(--text-muted); font-size: 0.75rem;">Supported Formats: MP3, WAV, FLAC (Max 20MB)</small>
                         </div>
                     </div>
+
+                    ${isRecordLabel ? `
+                    <div class="form-group track-artist-name-group" style="margin-bottom: 1rem;">
+                        <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">
+                            <i class="fa-solid fa-microphone" style="color: var(--primary);"></i> Track Artist Name
+                        </label>
+                        <input type="text" name="track_artist_name[]" class="form-input" placeholder="e.g. Wizkid, Davido, CKay..." required>
+                        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.25rem; display: block;">The featured / primary artist name for this specific track</small>
+                    </div>
+                    ` : `<input type="hidden" name="track_artist_name[]" value="${defaultArtistName}">`}
 
                     <div class="track-genre-group" style="display: ${showGenre}; margin-bottom: 1rem;">
                         <label class="form-label" style="display: flex; align-items: center; gap: 0.5rem;">

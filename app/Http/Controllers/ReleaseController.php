@@ -64,6 +64,8 @@ class ReleaseController extends Controller
             // Tracks arrays
             'track_title' => 'required|array|min:1',
             'track_title.*' => 'required|string|max:255',
+            'track_artist_name' => 'nullable|array',
+            'track_artist_name.*' => 'nullable|string|max:255',
             'track_composer' => 'required|array',
             'track_composer.*' => 'required|string|max:255',
             'track_songwriter' => 'required|array',
@@ -82,11 +84,33 @@ class ReleaseController extends Controller
             $rules['track_file.*'] = 'required|file|mimes:mp3,wav,flac|max:20480'; // 20MB audio tracks
         }
 
-        $request->validate($rules);
+        $messages = [
+            'track_file.*.uploaded' => 'The audio file for Track #:position exceeds the server upload limit (PHP upload_max_filesize). Please increase upload_max_filesize in your php.ini or upload a smaller file.',
+            'cover_image.uploaded' => 'The cover image exceeds the server upload limit (PHP upload_max_filesize). Please select an image under 2MB or increase php.ini upload limits.',
+        ];
+
+        $validator = \Illuminate\Support\Facades\Validator::make($request->all(), $rules, $messages);
+
+        if ($validator->fails()) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $validator->errors()->first(),
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            return back()->withErrors($validator)->withInput();
+        }
 
         // Security check: ensure user owns the selected artist
         $artist = Artist::findOrFail($request->artist_id);
         if ($artist->user_id !== $user->id) {
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized artist profile selection.'
+                ], 403);
+            }
             abort(403, 'Unauthorized artist selection.');
         }
 
@@ -163,7 +187,7 @@ class ReleaseController extends Controller
                 Track::create([
                     'release_id' => $release->id,
                     'title' => $trackTitle,
-                    'artist_name' => $artist->name,
+                    'artist_name' => $request->track_artist_name[$index] ?? $artist->art_name ?? $artist->name,
                     'genre' => $trackGenre,
                     'composer' => $request->track_composer[$index],
                     'songwriter' => $request->track_songwriter[$index],
@@ -199,6 +223,16 @@ class ReleaseController extends Controller
             // Run automated file, artwork, audio, and metadata quality control
             $qc = ReleaseQualityControlService::inspectAndProcess($release, $request);
 
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => true,
+                    'redirect' => route('releases.show', $release->id),
+                    'message' => $qc['passed'] 
+                        ? 'Automated Quality Inspection Passed! Release confirmed.' 
+                        : 'Release uploaded. Quality inspection identified issues for review.'
+                ]);
+            }
+
             if ($qc['passed']) {
                 if ($submitWithoutPayment) {
                     return redirect()->route('releases.show', $release->id)->with('success', 'Automated Quality Inspection Passed! Your release has met all store standards and has been automatically approved and distributed.');
@@ -220,6 +254,13 @@ class ReleaseController extends Controller
                 'ip_address' => $request->ip(),
                 'user_agent' => $request->userAgent()
             ]);
+
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Music upload failed: ' . $e->getMessage()
+                ], 422);
+            }
 
             return back()->with('error', 'Music upload failed: ' . $e->getMessage())->withInput();
         }

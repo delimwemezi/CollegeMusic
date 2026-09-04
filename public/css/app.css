@@ -372,6 +372,7 @@ input::-webkit-credentials-auto-fill-button {
 .app-content {
     flex: 1;
     margin-left: 260px;
+    min-width: 0;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -444,6 +445,7 @@ input::-webkit-credentials-auto-fill-button {
 .main-container {
     padding: 2rem;
     flex: 1;
+    min-width: 0;
 }
 
 .page-header {
@@ -592,7 +594,10 @@ input::-webkit-credentials-auto-fill-button {
     box-shadow: var(--shadow-sm);
     margin-bottom: 1.5rem;
     max-width: 100%;
+    min-width: 0;
     position: relative;
+    overflow-x: auto;
+    overflow-y: auto;
 }
 
 .card-header {
@@ -610,12 +615,23 @@ input::-webkit-credentials-auto-fill-button {
 
 .card-body {
     padding: 1.5rem;
+    min-width: 0;
     overflow-x: auto;
     overflow-y: auto;
     max-width: 100%;
     -webkit-overflow-scrolling: touch;
     scrollbar-width: thin;
     scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+.audit-log-card {
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.audit-log-card .card-body {
+    max-height: calc(100vh - 260px);
+    overflow: auto;
 }
 
 /* Scrollbars for cards and tables */
@@ -660,6 +676,8 @@ input::-webkit-credentials-auto-fill-button {
 /* Tables */
 .table-responsive {
     width: 100%;
+    max-width: 100%;
+    max-height: 65vh;
     overflow-x: auto;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
@@ -667,8 +685,13 @@ input::-webkit-credentials-auto-fill-button {
 
 .table {
     width: 100%;
+    min-width: 700px;
     border-collapse: collapse;
     text-align: left;
+}
+
+.audit-log-table {
+    min-width: 1100px;
 }
 
 .table th {

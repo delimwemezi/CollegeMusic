@@ -65,6 +65,12 @@ class DashboardController extends Controller
             $showVerificationWarning = ($user->status === 'active' && !Artist::where('user_id', $user->id)->exists());
         }
 
+        // Art Name Notification: show for artists that haven't set a distinct stage name
+        $showArtNameNotification = false;
+        if ($user->isArtist() && $artist) {
+            $showArtNameNotification = empty($artist->art_name) || $artist->art_name === $user->name;
+        }
+
         // Notifications (alerts generated for user, e.g. release reviews, payout reviews, upload status)
         $notifications = AuditLog::where('user_id', $user->id)
             ->whereIn('action', ['release_approved', 'release_rejected', 'release_distributed', 'withdrawal_completed', 'withdrawal_rejected', 'payment_completed', 'upload_success', 'upload_failed'])
@@ -72,6 +78,6 @@ class DashboardController extends Controller
             ->take(5)
             ->get();
 
-        return view('dashboard', compact('releasesCount', 'totalStreams', 'availableBalance', 'releases', 'showVerificationWarning', 'notifications', 'artist'));
+        return view('dashboard', compact('releasesCount', 'totalStreams', 'availableBalance', 'releases', 'showVerificationWarning', 'showArtNameNotification', 'notifications', 'artist'));
     }
 }

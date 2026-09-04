@@ -257,6 +257,14 @@
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label" for="name">Art Name</label>
+                        <input type="text" id="name" name="name" class="form-input" value="{{ old('name', $user->name) }}" required>
+                        @error('name')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
 
                     <div class="form-group">
                         <label class="form-label" for="email">Email Address</label>

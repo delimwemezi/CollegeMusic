@@ -2,7 +2,7 @@
     // Determine initial form state based on route and errors
     $activeState = request()->is('register') ? 'register' : 'login';
     if ($errors->any()) {
-        if ($errors->has('name') || $errors->has('email') || $errors->has('phone') || $errors->has('role') || $errors->has('password_confirmation')) {
+        if ($errors->has('name') || $errors->has('art_name') || $errors->has('email') || $errors->has('phone') || $errors->has('role') || $errors->has('password_confirmation')) {
             $activeState = 'register';
         } else {
             $activeState = 'login';
@@ -199,11 +199,28 @@
 
                     <div class="form-group">
                         <label class="form-label" for="reg_role">Account Type</label>
-                        <select id="reg_role" name="role" class="form-select" required>
+                        <select id="reg_role" name="role" class="form-select" required onchange="toggleArtNameField(this.value)">
                             <option value="artist" {{ old('role') == 'artist' ? 'selected' : '' }}>Artist</option>
                             <option value="record_label" {{ old('role') == 'record_label' ? 'selected' : '' }}>Record Label</option>
                         </select>
                         @error('role')
+                            <span class="invalid-feedback">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    {{-- Stage Name / Label Name (shown for Artist & Record Label) --}}
+                    <div class="form-group" id="artNameGroup" style="display: {{ old('art_name') || old('role', 'artist') ? 'block' : 'block' }};">
+                        <label class="form-label" for="reg_art_name" id="artNameLabel">
+                            <i class="fa-solid fa-star" style="color: var(--primary); font-size: 0.8rem;"></i>
+                            <span id="artNameLabelText">Stage Name / Artist Name</span>
+                        </label>
+                        <input type="text" id="reg_art_name" name="art_name" class="form-input" id="reg_art_name"
+                            placeholder="e.g. Tems, Burna Boy, Young Jonn..."
+                            value="{{ old('art_name') }}" required>
+                        <small style="color: var(--text-muted); font-size: 0.75rem; margin-top: 0.35rem; display: block;">
+                            This is the <strong>public name</strong> shown on all streaming platforms — must differ from your full name.
+                        </small>
+                        @error('art_name')
                             <span class="invalid-feedback">{{ $message }}</span>
                         @enderror
                     </div>
@@ -382,7 +399,28 @@
             const initialState = authWrapper.classList.contains('active-register') ? 'register' : 'login';
             const initialTitle = initialState === 'register' ? REGISTER_TITLE : LOGIN_TITLE;
             history.replaceState({ state: initialState }, initialTitle, window.location.href);
+
+            // Sync art name field label on page load (e.g. after validation error)
+            const roleSelect = document.getElementById('reg_role');
+            if (roleSelect) toggleArtNameField(roleSelect.value);
         });
+
+        function toggleArtNameField(role) {
+            const group = document.getElementById('artNameGroup');
+            const labelText = document.getElementById('artNameLabelText');
+            const input = document.getElementById('reg_art_name');
+            if (!group) return;
+
+            if (role === 'record_label') {
+                labelText.textContent = 'Label Name';
+                input.placeholder = 'e.g. Def Jam Africa, Sony Music Nigeria...';
+            } else {
+                labelText.textContent = 'Stage Name / Artist Name';
+                input.placeholder = 'e.g. Tems, Burna Boy, Young Jonn...';
+            }
+            // Always visible for both roles
+            group.style.display = 'block';
+        }
 
         function togglePasswordVisibility(inputId, btn) {
             const input = document.getElementById(inputId);

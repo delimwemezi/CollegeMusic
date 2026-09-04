@@ -26,6 +26,7 @@ class AuthController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
+            'art_name' => 'required|string|max:255|different:name',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20|unique:users',
             'password' => [
@@ -47,6 +48,7 @@ class AuthController extends Controller
         // Create User
         $user = User::create([
             'name' => $request->name,
+            'art_name' => $request->art_name,
             'email' => $request->email,
             'phone' => $request->phone,
             'password' => Hash::make($request->password),
@@ -105,7 +107,8 @@ class AuthController extends Controller
             if ($user->role === 'artist' && !$user->artist) {
                 Artist::create([
                     'user_id' => $user->id,
-                    'name' => $user->name,
+                    'name'     => $user->art_name ?? $user->name,
+                    'art_name' => $user->art_name,
                     'verification_status' => 'pending',
                 ]);
             }

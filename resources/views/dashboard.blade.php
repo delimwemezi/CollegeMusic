@@ -42,6 +42,40 @@
     </div>
 @endif
 
+{{-- Stage Name Notification: nudge existing artists to set a distinct art name --}}
+@if(!empty($showArtNameNotification) && $showArtNameNotification)
+    <div class="alert alert-warning animate-fade-up" id="artNameNotificationBanner"
+         style="margin-bottom: 2rem; border-color: rgba(251, 191, 36, 0.35); background: rgba(251,191,36,0.07); display: flex; align-items: flex-start; flex-wrap: wrap; gap: 1rem; position: relative;">
+        {{-- Dismiss button --}}
+        <button type="button" onclick="document.getElementById('artNameNotificationBanner').style.display='none';"
+                style="position: absolute; top: 0.75rem; right: 0.9rem; background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; line-height: 1;"
+                aria-label="Dismiss">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <i class="fa-solid fa-star" style="font-size: 1.6rem; color: #f59e0b; flex-shrink: 0; margin-top: 0.15rem;"></i>
+
+        <div style="flex: 1; min-width: 200px; padding-right: 1.5rem;">
+            <h4 style="font-weight: bold; margin-bottom: 0.3rem; color: var(--text-primary); font-size: 0.95rem;">
+                Set Your Stage / Artist Name
+            </h4>
+            <p style="font-size: 0.82rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 0;">
+                Your artist profile currently uses your <strong>full name</strong>
+                (<em>{{ auth()->user()->name }}</em>) as the public artist name shown on streaming platforms.
+                Add a unique <strong>stage name</strong> so your music appears correctly on Spotify, Apple Music, and other DSPs.
+            </p>
+        </div>
+
+        <div style="flex-shrink: 0; align-self: center;">
+            <a href="{{ route('profile.edit') }}" class="btn btn-sm"
+               style="background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; border: none; font-weight: 600; padding: 0.45rem 1rem; white-space: nowrap;">
+                <i class="fa-solid fa-pen-to-square"></i> Update Stage Name
+            </a>
+        </div>
+    </div>
+@endif
+
+
 <!-- Stats Counters Grid -->
 <div class="grid-stats">
     <div class="stat-card">
