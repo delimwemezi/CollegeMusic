@@ -197,9 +197,13 @@
                             <div class="profile-role" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ str_replace('_', ' ', $user->role) }}</div>
                         </div>
                     </div>
-                    <a href="{{ route('logout') }}" class="btn btn-secondary btn-sm sidebar-logout-btn" style="background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 0.45rem 0.65rem;" title="Logout">
-                        <i class="fa-solid fa-right-from-bracket"></i>
-                    </a>
+                    <form action="{{ route('logout') }}" method="POST" class="sidebar-logout-form">
+                        @csrf
+                        <button type="submit" class="btn btn-secondary btn-sm sidebar-logout-btn" style="background-color: rgba(239, 68, 68, 0.1); border-color: rgba(239, 68, 68, 0.2); color: #fca5a5; padding: 0.45rem 0.65rem;" title="Sign out">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </form>
                 @endif
             </div>
         </aside>

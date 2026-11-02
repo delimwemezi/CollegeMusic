@@ -50,7 +50,7 @@
     </div>
 </div>
 
-<div class="grid-cols-3">
+<div class="grid-cols-3 admin-control-grid">
     <!-- Quick Actions Panel -->
     <div class="card">
         <div class="card-header">
@@ -75,8 +75,29 @@
         </div>
     </div>
 
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title"><i class="fa-solid fa-headset"></i> Customer Service Contacts</h3>
+        </div>
+        <div class="card-body">
+            <form method="POST" action="{{ route('admin.customer_service') }}">
+                @csrf
+                <div class="form-group">
+                    <label for="customer_service_email" class="form-label">Support email address</label>
+                    <input id="customer_service_email" name="customer_service_email" type="email" class="form-input" value="{{ old('customer_service_email', $customerService['email'] ?? '') }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="customer_service_whatsapp" class="form-label">WhatsApp number</label>
+                    <input id="customer_service_whatsapp" name="customer_service_whatsapp" type="text" class="form-input" value="{{ old('customer_service_whatsapp', $customerService['whatsapp'] ?? '') }}" placeholder="+255 744 904 978" required>
+                    <small class="invalid-feedback" style="color: var(--text-muted);">Include the country code.</small>
+                </div>
+                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-save"></i> Save Contacts</button>
+            </form>
+        </div>
+    </div>
+
     <!-- Real-time Audit Logs -->
-    <div style="grid-column: span 2;">
+    <div class="grid-span-full">
         <div class="card">
             <div class="card-header">
                 <h3 class="card-title"><i class="fa-solid fa-shield-halved"></i> Recent Audit Activity Logs</h3>

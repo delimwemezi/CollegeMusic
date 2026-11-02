@@ -480,7 +480,7 @@ input::-webkit-credentials-auto-fill-button {
 
 .grid-cols-2 {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 1.25rem;
     margin-bottom: 1.5rem;
     width: 100%;
@@ -491,12 +491,21 @@ input::-webkit-credentials-auto-fill-button {
 
 .grid-cols-3 {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.25rem;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
     margin-bottom: 1.5rem;
     width: 100%;
 }
 .grid-cols-3 > * {
+    min-width: 0;
+}
+
+.admin-control-grid {
+    column-gap: 2rem;
+    row-gap: 1.5rem;
+}
+
+.grid-span-full {
+    grid-column: 1 / -1;
     min-width: 0;
 }
 
@@ -849,11 +858,9 @@ input::-webkit-credentials-auto-fill-button {
     .menu-toggle {
         display: block;
     }
-    
     .sidebar-backdrop {
         display: block;
     }
-    
     .app-sidebar {
         transform: translateX(-100%);
         box-shadow: 4px 0 24px rgba(0, 0, 0, 0.5);

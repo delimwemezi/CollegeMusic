@@ -7,6 +7,7 @@ use App\Models\AuditLog;
 use App\Models\SystemSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
@@ -167,5 +168,44 @@ class ProfileController extends Controller
         $request->session()->regenerateToken();
 
         return redirect()->route('login')->with('success', 'Your account has been deactivated successfully.');
+    }
+
+    public function deleteAccount(Request $request)
+    {
+        $user = Auth::user();
+
+        abort_unless($user->isArtist(), 403);
+
+        $request->validate([
+            'confirm_delete' => 'required|accepted',
+        ]);
+
+        $profilePicture = $user->artist?->profile_picture;
+
+        DB::transaction(function () use ($user, $request) {
+            AuditLog::create([
+                'user_id' => $user->id,
+                'action' => 'delete_account',
+                'description' => 'Artist permanently deleted their account.',
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            if ($user->artist) {
+                $user->artist->delete();
+            }
+
+            $user->delete();
+        });
+
+        if ($profilePicture) {
+            Storage::disk('public')->delete($profilePicture);
+        }
+
+        Auth::logout();
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('register')->with('success', 'Your artist account and catalog have been permanently deleted.');
     }
 }

@@ -798,7 +798,7 @@
         var type = document.getElementById('type').value;
         var rows = document.querySelectorAll('.track-row');
         var isRecordLabel = {{ auth()->user()->isRecordLabel() ? 'true' : 'false' }};
-        var defaultArtistName = {{ json_encode(auth()->user()->artist->art_name ?? auth()->user()->artist->name ?? auth()->user()->art_name ?? auth()->user()->name) }};
+        var defaultArtistName = @json(auth()->user()->artist->art_name ?? auth()->user()->artist->name ?? auth()->user()->art_name ?? auth()->user()->name);
         
         if (type === 'ep' && rows.length >= 6) {
             showStepNotification('An EP cannot have more than 6 tracks. To add more tracks, change Release Type to Album in Step 1.');

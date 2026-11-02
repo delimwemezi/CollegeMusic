@@ -896,6 +896,88 @@
             padding-left: 2px;
         }
 
+        .footer-menu-description {
+            display: block;
+            margin-top: 0.2rem;
+            color: var(--text-muted);
+            font-size: 0.75rem;
+            line-height: 1.45;
+        }
+            .legal-dialog {
+                position: fixed;
+                inset: 0;
+                z-index: 1000;
+                display: none;
+                align-items: center;
+                justify-content: center;
+                padding: 1.25rem;
+                background: rgba(0, 0, 0, 0.72);
+            }
+
+            .legal-dialog.open {
+                display: flex;
+            }
+
+            .legal-dialog-panel {
+                width: min(680px, 100%);
+                max-height: min(80vh, 620px);
+                overflow-y: auto;
+                background: var(--bg-card);
+                border: 1px solid var(--border-color);
+                border-radius: var(--radius-lg);
+                padding: 2rem;
+                box-shadow: var(--shadow-lg);
+            }
+
+            .legal-dialog-header {
+                display: flex;
+                align-items: flex-start;
+                justify-content: space-between;
+                gap: 1rem;
+                margin-bottom: 1.25rem;
+            }
+
+            .legal-dialog-title {
+                color: var(--text-primary);
+                font-size: 1.35rem;
+            }
+
+            .legal-dialog-close {
+                flex: 0 0 auto;
+                border: 0;
+                background: transparent;
+                color: var(--text-secondary);
+                cursor: pointer;
+                font-size: 1.25rem;
+                padding: 0.25rem;
+            }
+
+            .legal-dialog-close:hover {
+                color: var(--text-primary);
+            }
+
+            .legal-dialog-content {
+                color: var(--text-secondary);
+                font-size: 0.92rem;
+                line-height: 1.7;
+            }
+
+            .legal-dialog-content h4 {
+                color: var(--text-primary);
+                font-size: 1rem;
+                margin: 1.25rem 0 0.35rem;
+            }
+
+            .legal-dialog-content h4:first-child {
+                margin-top: 0;
+            }
+
+            @media (max-width: 600px) {
+                .legal-dialog-panel {
+                    padding: 1.25rem;
+                }
+            }
+
         .footer-bottom {
             border-top: 1px solid var(--border-color);
             padding-top: 2rem;
@@ -1936,6 +2018,15 @@
                         <i class="fa-solid fa-music" style="color: var(--primary);"></i> CollegeMusic
                     </a>
                     <p class="footer-desc">{{ __('messages.footer_tagline') }}</p>
+                    <div style="margin-bottom: 1.5rem;">
+                        <div style="color: var(--text-primary); font-size: 0.8rem; font-weight: 700; margin-bottom: 0.35rem;">Contact Support</div>
+                        <a href="mailto:{{ $customerService['email'] ?? 'collegemusic97@gmail.com' }}" class="footer-menu-link" style="font-size: 0.85rem;">
+                            <i class="fa-solid fa-envelope" style="margin-right: 0.35rem;"></i> {{ $customerService['email'] ?? 'collegemusic97@gmail.com' }}
+                        </a>
+                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $customerService['whatsapp'] ?? '255744904978') }}" target="_blank" rel="noopener noreferrer" class="footer-menu-link" style="display: block; font-size: 0.85rem; margin-top: 0.45rem;">
+                            <i class="fa-brands fa-whatsapp" style="margin-right: 0.35rem; color: #25d366;"></i> WhatsApp Support
+                        </a>
+                    </div>
                     <div class="footer-socials">
                         <a href="#" class="social-link"><i class="fa-brands fa-facebook"></i></a>
                         <a href="#" class="social-link"><i class="fa-brands fa-x"></i></a>
@@ -1967,10 +2058,10 @@
                 <div>
                     <h4 class="footer-col-title">{{ __('messages.footer_col_legal') }}</h4>
                     <ul class="footer-menu">
-                        <li><a href="#" class="footer-menu-link">Terms of Service</a></li>
-                        <li><a href="#" class="footer-menu-link">Privacy Policy</a></li>
-                        <li><a href="#" class="footer-menu-link">Copyright Guidelines</a></li>
-                        <li><a href="#" class="footer-menu-link">GDPR Compliance</a></li>
+                        <li><a href="#" class="footer-menu-link legal-link" data-legal-topic="terms">Terms of Service</a></li>
+                        <li><a href="#" class="footer-menu-link legal-link" data-legal-topic="privacy">Privacy Policy</a></li>
+                        <li><a href="#" class="footer-menu-link legal-link" data-legal-topic="copyright">Copyright Guidelines</a></li>
+                        <li><a href="#" class="footer-menu-link legal-link" data-legal-topic="gdpr">GDPR Compliance</a></li>
                     </ul>
                 </div>
             </div>
@@ -1989,7 +2080,72 @@
         </div>
     </footer>
 
+    <div class="legal-dialog" id="legalDialog" role="dialog" aria-modal="true" aria-labelledby="legalDialogTitle" aria-hidden="true">
+        <div class="legal-dialog-panel">
+            <div class="legal-dialog-header">
+                <h2 class="legal-dialog-title" id="legalDialogTitle"></h2>
+                <button type="button" class="legal-dialog-close" id="legalDialogClose" aria-label="Close details">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="legal-dialog-content" id="legalDialogContent"></div>
+        </div>
+    </div>
+
     <script>
+        const legalTopics = {
+            terms: {
+                title: 'Terms of Service',
+                content: '<h4>Using CollegeMusic</h4><p>CollegeMusic helps artists and record labels upload music, send it to digital stores, manage releases, and view earnings. By using the platform, you agree to use it lawfully and provide accurate account information.</p><h4>Your responsibility</h4><p>You must own or have permission to use the music, artwork, names, and other content you upload. Do not use the platform to upload stolen, misleading, harmful, or illegal content.</p><h4>Account actions</h4><p>We may pause or remove content that breaks these rules. You can also delete your artist account from your dashboard. Some payment or legal records may need to be kept when required by law.</p>'
+            },
+            privacy: {
+                title: 'Privacy Policy',
+                content: '<h4>Information we collect</h4><p>We collect information you provide, such as your name, email, phone number, artist details, release information, and payout details. We also collect basic technical information needed to keep the service secure.</p><h4>How we use it</h4><p>We use your information to create your account, distribute your music, process payments, provide support, send important notifications, and prevent fraud.</p><h4>Your information</h4><p>We do not sell your personal information. We protect it with reasonable security controls and only share it with service providers when they need it to provide platform services or when the law requires it.</p>'
+            },
+            copyright: {
+                title: 'Copyright Guidelines',
+                content: '<h4>Upload only what you control</h4><p>Only upload music, artwork, videos, names, and other content that you created or are legally allowed to distribute.</p><h4>Rights and permissions</h4><p>If a song includes a sample, feature, cover, beat, image, or other work made by someone else, you must obtain the needed permission before uploading it.</p><h4>Copyright complaints</h4><p>We may remove content after a valid copyright complaint. Repeated copyright violations can lead to release removal, account suspension, or account deletion.</p>'
+            },
+            gdpr: {
+                title: 'GDPR Compliance',
+                content: '<h4>Your data rights</h4><p>Depending on where you live, you may have the right to view, correct, export, or delete your personal information. You may also ask us to limit or stop certain uses of your data.</p><h4>Account deletion</h4><p>Artists can request permanent account deletion from the dashboard. We remove the account data we are allowed to remove, while keeping records that we must retain for legal, security, tax, or payment reasons.</p><h4>Questions</h4><p>Contact CollegeMusic support if you want to use one of these rights or have a question about your personal data.</p>'
+            }
+        };
+
+        function openLegalDialog(topic) {
+            const dialog = document.getElementById('legalDialog');
+            const details = legalTopics[topic];
+            if (!dialog || !details) return;
+
+            document.getElementById('legalDialogTitle').textContent = details.title;
+            document.getElementById('legalDialogContent').innerHTML = details.content;
+            dialog.classList.add('open');
+            dialog.setAttribute('aria-hidden', 'false');
+            document.getElementById('legalDialogClose').focus();
+        }
+
+        function closeLegalDialog() {
+            const dialog = document.getElementById('legalDialog');
+            if (!dialog) return;
+            dialog.classList.remove('open');
+            dialog.setAttribute('aria-hidden', 'true');
+        }
+
+        document.querySelectorAll('.legal-link').forEach(function(link) {
+            link.addEventListener('click', function(event) {
+                event.preventDefault();
+                openLegalDialog(link.dataset.legalTopic);
+            });
+        });
+
+        document.getElementById('legalDialogClose').addEventListener('click', closeLegalDialog);
+        document.getElementById('legalDialog').addEventListener('click', function(event) {
+            if (event.target === this) closeLegalDialog();
+        });
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') closeLegalDialog();
+        });
+
         // Dynamic Content View Filtering System
         function switchViewMode(mode, updateHistory = true) {
             const validModes = ['all', 'features', 'platforms', 'pricing'];

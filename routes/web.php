@@ -2,10 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Models\SystemSetting;
 
 // Public SoundBridge Landing Page
 Route::get('/', function () {
-    return view('welcome');
+    $customerService = SystemSetting::get('customer_service', [
+        'email' => 'collegemusic97@gmail.com',
+        'whatsapp' => '255744904978',
+    ]);
+
+    return view('welcome', compact('customerService'));
 })->name('home');
 
 Route::get('/explore', [\App\Http\Controllers\SearchController::class, 'explore'])->name('explore');
@@ -36,7 +42,7 @@ Route::get('/lang/{locale}', function ($locale) {
 })->name('locale.switch');
 
 // Protected Routes (Required Authentication)
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['auth', \App\Http\Middleware\ForcePasswordChange::class])->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
@@ -47,7 +53,11 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/profile/password', [\App\Http\Controllers\ProfileController::class, 'changePassword'])->name('profile.password');
     Route::post('/profile/settings', [\App\Http\Controllers\ProfileController::class, 'updateSettings'])->name('profile.settings');
     Route::post('/profile/deactivate', [\App\Http\Controllers\ProfileController::class, 'deactivate'])->name('profile.deactivate');
+    Route::post('/profile/delete', [\App\Http\Controllers\ProfileController::class, 'deleteAccount'])->name('profile.delete');
     Route::post('/profile/upgrade', [\App\Http\Controllers\PaymentController::class, 'processUpgrade'])->name('profile.upgrade');
+
+    Route::get('/admin/password/change', [AuthController::class, 'showForcePasswordChange'])->name('admin.password.force');
+    Route::post('/admin/password/change', [AuthController::class, 'forcePasswordChange'])->name('admin.password.update');
     
     // Artist Verification & Profiles (FR6-FR7)
     Route::post('/artist/verify', [\App\Http\Controllers\ArtistController::class, 'submitVerification'])->name('artist.verify');
@@ -86,10 +96,13 @@ Route::middleware(['auth'])->group(function () {
     // Admin Module (FR38-FR43)
     Route::middleware([\App\Http\Middleware\AdminMiddleware::class])->group(function () {
         Route::get('/admin', [\App\Http\Controllers\AdminController::class, 'index'])->name('admin');
+        Route::post('/admin/customer-service', [\App\Http\Controllers\AdminController::class, 'updateCustomerService'])->name('admin.customer_service');
         
         // Admin - User Management
         Route::get('/admin/users', [\App\Http\Controllers\AdminController::class, 'users'])->name('admin.users');
+        Route::post('/admin/users/admin', [\App\Http\Controllers\AdminController::class, 'createAdmin'])->name('admin.users.create_admin');
         Route::post('/admin/users/{user}/status', [\App\Http\Controllers\AdminController::class, 'updateUserStatus'])->name('admin.users.status');
+        Route::delete('/admin/users/{user}/admin', [\App\Http\Controllers\AdminController::class, 'deleteAdmin'])->name('admin.users.delete_admin');
         
         // Admin - Catalog Verification & Reviews
         Route::get('/admin/releases', [\App\Http\Controllers\AdminController::class, 'releases'])->name('admin.releases');

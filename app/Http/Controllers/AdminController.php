@@ -15,6 +15,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 
 class AdminController extends Controller
@@ -32,14 +34,85 @@ class AdminController extends Controller
         ];
 
         $recentLogs = AuditLog::with('user')->orderBy('created_at', 'desc')->take(10)->get();
+        $customerService = SystemSetting::get('customer_service', [
+            'email' => 'collegemusic97@gmail.com',
+            'whatsapp' => '255744904978',
+        ]);
 
-        return view('admin.index', compact('stats', 'recentLogs'));
+        return view('admin.index', compact('stats', 'recentLogs', 'customerService'));
+    }
+
+    public function updateCustomerService(Request $request)
+    {
+        $validated = $request->validate([
+            'customer_service_email' => 'required|email|max:255',
+            'customer_service_whatsapp' => ['required', 'string', 'max:30', 'regex:/^\\+?[0-9][0-9 ]{6,28}$/'],
+        ]);
+
+        $whatsapp = preg_replace('/[^0-9]/', '', $validated['customer_service_whatsapp']);
+
+        SystemSetting::set('customer_service', [
+            'email' => $validated['customer_service_email'],
+            'whatsapp' => $whatsapp,
+        ], Auth::id());
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'admin_customer_service_changed',
+            'description' => 'Updated the customer service email address and WhatsApp number.',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Customer service contact details updated successfully.');
     }
 
     public function users()
     {
         $users = User::with('artist', 'subscription')->orderBy('created_at', 'desc')->paginate(20);
         return view('admin.users', compact('users'));
+    }
+
+    public function createAdmin(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|email|max:255|unique:users,email',
+        ]);
+
+        $verificationCode = (string) random_int(100000, 999999);
+        $temporaryPassword = 'Cm-' . Str::random(10) . '!9a';
+
+        $admin = User::create([
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($temporaryPassword),
+            'role' => 'admin',
+            'status' => 'active',
+            'verification_code' => $verificationCode,
+            'must_change_password' => true,
+        ]);
+
+        try {
+            Mail::raw("Hello {$admin->name},\n\nAn administrator account was created for you on CollegeMusic.\n\nVerification code: {$verificationCode}\nTemporary password: {$temporaryPassword}\n\nVerify your email and sign in with the temporary password. You will be required to create a new password before accessing the system.\n\nIf you did not expect this account, contact the platform owner immediately.\n\nCollegeMusic Team", function ($message) use ($admin) {
+                $message->to($admin->email)->subject('Your CollegeMusic Administrator Account');
+            });
+        } catch (\Throwable $exception) {
+            $admin->delete();
+            Log::error("Failed to send administrator account email to {$admin->email}: " . $exception->getMessage());
+
+            return back()->with('error', 'The administrator account could not be created because the email could not be sent.');
+        }
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'admin_account_created',
+            'description' => "Created administrator account for {$admin->email}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Administrator account created. Verification instructions and a temporary password were sent by email.');
     }
 
     public function updateUserStatus(Request $request, User $user)
@@ -60,6 +133,34 @@ class AdminController extends Controller
         ]);
 
         return back()->with('success', "User status updated to {$request->status} successfully.");
+    }
+
+    public function deleteAdmin(Request $request, User $user)
+    {
+        if (!$user->isAdmin()) {
+            return back()->with('error', 'Only administrator accounts can be deleted here.');
+        }
+
+        if ($user->id === Auth::id()) {
+            return back()->with('error', 'You cannot delete the administrator account you are currently using.');
+        }
+
+        if (User::where('role', 'admin')->where('id', '!=', $user->id)->count() < 1) {
+            return back()->with('error', 'The final administrator account cannot be deleted.');
+        }
+
+        $email = $user->email;
+        $user->delete();
+
+        AuditLog::create([
+            'user_id' => Auth::id(),
+            'action' => 'admin_account_deleted',
+            'description' => "Deleted administrator account for {$email}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', 'Administrator account deleted successfully.');
     }
 
     public function artists()

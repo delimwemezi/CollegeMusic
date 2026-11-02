@@ -63,9 +63,8 @@ class AuthController extends Controller
             ]
         ]);
 
-        // For convenience in local testing, we log the code and save it in session
-        Log::info("Verification code for User ID {$user->id} ({$user->email}): {$verificationCode}");
-        session(['verify_email' => $user->email, 'debug_verification_code' => $verificationCode]);
+        $this->sendVerificationEmail($user, $verificationCode);
+        session(['verify_email' => $user->email]);
 
         // Audit Log
         AuditLog::create([
@@ -124,6 +123,10 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
+            if ($user->must_change_password) {
+                return redirect()->route('admin.password.force')->with('success', 'Email verified. Change your temporary password to finish signing in.');
+            }
+
             return redirect()->route('dashboard')->with('success', 'Account verified and logged in!');
         }
 
@@ -133,6 +136,9 @@ class AuthController extends Controller
     public function showLogin()
     {
         if (Auth::check()) {
+            if (Auth::user()->must_change_password) {
+                return redirect()->route('admin.password.force');
+            }
             return redirect()->route('dashboard');
         }
         return view('auth.login');
@@ -177,7 +183,8 @@ class AuthController extends Controller
                 Auth::user()->verification_code = $verificationCode;
                 Auth::user()->save();
 
-                session(['verify_email' => Auth::user()->email, 'debug_verification_code' => $verificationCode]);
+                $this->sendVerificationEmail(Auth::user(), $verificationCode);
+                session(['verify_email' => Auth::user()->email]);
                 Auth::logout();
 
                 return redirect()->route('verify.show')->with('warning', 'Please verify your account before logging in. A new verification code was generated.');
@@ -191,10 +198,50 @@ class AuthController extends Controller
                 'user_agent' => $request->userAgent()
             ]);
 
+            if ($user->must_change_password) {
+                return redirect()->route('admin.password.force');
+            }
+
             return redirect()->intended(route('dashboard'));
         }
 
         return back()->withErrors(['password' => 'Incorrect password.'])->withInput();
+    }
+
+    public function showForcePasswordChange()
+    {
+        return view('auth.force_password');
+    }
+
+    public function forcePasswordChange(Request $request)
+    {
+        $request->validate([
+            'password' => [
+                'required',
+                'string',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols(),
+            ],
+        ]);
+
+        $user = Auth::user();
+        $user->password = Hash::make($request->password);
+        $user->must_change_password = false;
+        $user->save();
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'admin_initial_password_changed',
+            'description' => 'Administrator changed the temporary password before first sign-in.',
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return redirect()->intended(route('dashboard'))->with('success', 'Password changed successfully.');
     }
 
     public function logout(Request $request)
@@ -305,5 +352,16 @@ class AuthController extends Controller
         }
 
         return back()->withErrors(['code' => 'Invalid recovery code.'])->withInput();
+    }
+
+    private function sendVerificationEmail(User $user, string|int $verificationCode): void
+    {
+        try {
+            Mail::raw("Hello {$user->name},\n\nYour CollegeMusic verification code is: {$verificationCode}\n\nIf you did not create this account, please contact support.\n\nCollegeMusic Team", function ($message) use ($user) {
+                $message->to($user->email)->subject('CollegeMusic Email Verification Code');
+            });
+        } catch (\Throwable $exception) {
+            Log::error("Failed to send verification email to {$user->email}: " . $exception->getMessage());
+        }
     }
 }

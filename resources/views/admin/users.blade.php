@@ -18,6 +18,29 @@
 
 <div class="card">
     <div class="card-header">
+        <h3 class="card-title"><i class="fa-solid fa-user-shield"></i> Add Administrator</h3>
+    </div>
+    <div class="card-body">
+        <p style="color: var(--text-secondary); margin-bottom: 1rem;">The new administrator will receive a verification code and temporary password by email. The temporary password must be changed before access is granted.</p>
+        <form method="POST" action="{{ route('admin.users.create_admin') }}" class="grid-cols-2" style="margin-bottom: 0;">
+            @csrf
+            <div class="form-group">
+                <label class="form-label" for="admin_name">Full name</label>
+                <input class="form-input" id="admin_name" name="name" type="text" value="{{ old('name') }}" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label" for="admin_email">Email address</label>
+                <input class="form-input" id="admin_email" name="email" type="email" value="{{ old('email') }}" required>
+            </div>
+            <div>
+                <button class="btn btn-primary" type="submit"><i class="fa-solid fa-user-plus"></i> Create Administrator</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
         <h3 class="card-title">User Accounts Directory</h3>
     </div>
     <div class="card-body" style="padding: 0;">
@@ -85,6 +108,15 @@
                                             </button>
                                         @endif
                                     </form>
+                                    @if($user->isAdmin())
+                                        <form action="{{ route('admin.users.delete_admin', $user->id) }}" method="POST" style="margin: 0 0 0 0.35rem; display: inline-block;" onsubmit="return confirm('Delete this administrator account permanently?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-danger btn-sm">
+                                                <i class="fa-solid fa-trash"></i> Delete
+                                            </button>
+                                        </form>
+                                    @endif
                                 @else
                                     <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">Current Session</span>
                                 @endif

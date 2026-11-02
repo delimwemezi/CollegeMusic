@@ -407,6 +407,34 @@
                 </form>
             </div>
         </div>
+
+        @if($user->isArtist())
+        <div class="card" style="border-color: rgba(239, 68, 68, 0.45);">
+            <div class="card-header" style="background-color: rgba(239, 68, 68, 0.1); border-bottom: 1px solid rgba(239, 68, 68, 0.2);">
+                <h3 class="card-title" style="color: var(--danger);"><i class="fa-solid fa-user-xmark"></i> Delete Account</h3>
+            </div>
+            <div class="card-body">
+                <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.25rem; line-height: 1.6;">
+                    Permanently deleting your artist account removes your artist profile, catalog, releases, and account data. This action cannot be undone.
+                </p>
+                <form action="{{ route('profile.delete') }}" method="POST" onsubmit="return confirm('Permanently delete your artist account and catalog? This cannot be undone.');">
+                    @csrf
+                    <div class="form-group" style="display: flex; align-items: flex-start; gap: 0.75rem; margin-bottom: 1.5rem;">
+                        <input type="checkbox" id="confirm_delete" name="confirm_delete" class="form-checkbox" required>
+                        <label for="confirm_delete" class="form-checkbox-label" style="font-size: 0.85rem; line-height: 1.4;">
+                            I understand that my artist account and all catalog data will be permanently deleted.
+                        </label>
+                    </div>
+                    @error('confirm_delete')
+                        <span class="invalid-feedback" style="display: block; margin-bottom: 1rem;">{{ $message }}</span>
+                    @enderror
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fa-solid fa-trash"></i> Permanently Delete My Account
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endif
     </div>
 </div>
 @endsection
