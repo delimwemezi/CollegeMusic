@@ -327,6 +327,10 @@
                     <span style="color: var(--text-secondary);">New to CollegeMusic?</span>
                     <a href="{{ route('register') }}" class="switch-link" id="switchToRegister">Create an Account</a>
                 </div>
+
+                <div style="margin-top: 1.25rem; text-align: center; font-size: 0.9rem;">
+                    <a href="{{ route('home') }}" style="font-weight: 600; color: var(--primary);">Back to Home</a>
+                </div>
             </div>
         </div>
     </div>
