@@ -151,14 +151,25 @@
                                     @elseif($release->distribution_status === 'pending_takedown')
                                         <form action="{{ route('admin.releases.review', $release->id) }}" method="POST" style="margin: 0;">
                                             @csrf
-                                            <input type="hidden" name="action" value="reject">
-                                            <input type="hidden" name="rejection_reason" value="Takedown request processed by administrator.">
+                                            <input type="hidden" name="action" value="process_full_takedown">
                                             <button type="submit" class="btn btn-danger btn-sm">
-                                                <i class="fa-solid fa-trash-can"></i> Confirm Takedown
+                                                <i class="fa-solid fa-trash-can"></i> Confirm Full Removal
                                             </button>
                                         </form>
                                     @else
                                         <span style="color: var(--text-muted); font-size: 0.85rem; font-style: italic;">Reviewed</span>
+                                    @endif
+                                    @if($release->distribution_status === 'distributed')
+                                        @foreach($release->stores->where('status', 'pending_takedown') as $store)
+                                            <form action="{{ route('admin.releases.review', $release->id) }}" method="POST" style="margin: 0.5rem 0 0 auto; max-width: 180px;">
+                                                @csrf
+                                                <input type="hidden" name="action" value="process_store_takedown">
+                                                <input type="hidden" name="store_id" value="{{ $store->id }}">
+                                                <button type="submit" class="btn btn-danger btn-sm btn-block" title="Confirm you have processed this removal with the distributor">
+                                                    <i class="fa-solid fa-trash-can"></i> Confirm {{ $store->store_name }} Removal
+                                                </button>
+                                            </form>
+                                        @endforeach
                                     @endif
                                 </td>
                             </tr>

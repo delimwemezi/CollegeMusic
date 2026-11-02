@@ -75,10 +75,22 @@
                             @endif
                             <span style="font-weight: 500; font-size: 0.9rem;">{{ $store->store_name }}</span>
                         </div>
-                        <div>
-                            @if($release->distribution_status === 'distributed')
+                        <div style="text-align: right;">
+                            @if($store->status === 'distributed')
                                 <span class="badge badge-distributed" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;"><i class="fa-solid fa-circle-check" style="margin-right: 0.25rem;"></i> Active</span>
-                            @elseif($release->distribution_status === 'rejected')
+                                @if(auth()->id() === $release->artist->user_id)
+                                    <form action="{{ route('releases.stores.takedown', [$release->id, $store->id]) }}" method="POST" onsubmit="return confirm('Request removal of this release from {{ $store->store_name }}?');" style="margin-top: 0.4rem;">
+                                        @csrf
+                                        <button type="submit" class="btn btn-danger btn-sm" style="font-size: 0.7rem; padding: 0.25rem 0.45rem;">
+                                            <i class="fa-solid fa-ban"></i> Remove
+                                        </button>
+                                    </form>
+                                @endif
+                            @elseif($store->status === 'pending_takedown')
+                                <span class="badge badge-pending" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">Removal Pending</span>
+                            @elseif($store->status === 'removed')
+                                <span class="badge badge-rejected" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">Removed</span>
+                            @elseif($store->status === 'failed')
                                 <span class="badge badge-rejected" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">Failed</span>
                             @else
                                 <span class="badge badge-pending" style="font-size: 0.7rem; padding: 0.15rem 0.5rem;">Pending</span>
@@ -245,10 +257,14 @@
                                     <span class="badge badge-approved" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">Approved (Awaiting Platform Ingestion)</span>
                                 @elseif($release->distribution_status === 'distributed')
                                     <span class="badge badge-distributed" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">Successfully Distributed</span>
+                                @elseif($release->distribution_status === 'removed')
+                                    <span class="badge badge-rejected" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">Removed from Platforms</span>
                                 @elseif($release->distribution_status === 'rejected')
                                     <span class="badge badge-rejected" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">Rejected / Corrections Needed</span>
                                 @elseif($release->distribution_status === 'pending_takedown')
                                     <span class="badge badge-rejected" style="font-size: 0.85rem; padding: 0.35rem 0.75rem; background-color: rgba(239, 68, 68, 0.1); color: var(--danger);">Takedown Pending Review</span>
+                                @elseif($release->distribution_status === 'removed')
+                                    <span class="badge badge-rejected" style="font-size: 0.85rem; padding: 0.35rem 0.75rem;">Removed from Platforms</span>
                                 @endif
                             </div>
                         </div>

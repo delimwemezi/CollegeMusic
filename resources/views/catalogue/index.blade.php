@@ -96,6 +96,10 @@
                                             <span class="badge badge-approved">Approved</span>
                                         @elseif($release->distribution_status === 'distributed')
                                             <span class="badge badge-distributed">Distributed</span>
+                                        @elseif($release->distribution_status === 'pending_takedown')
+                                            <span class="badge badge-pending">Takedown Pending</span>
+                                        @elseif($release->distribution_status === 'removed')
+                                            <span class="badge badge-rejected">Removed</span>
                                         @elseif($release->distribution_status === 'rejected')
                                             <span class="badge badge-rejected" title="Reason: {{ $release->rejection_reason }}">Changes Requested</span>
                                         @endif

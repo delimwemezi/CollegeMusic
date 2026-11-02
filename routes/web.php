@@ -76,6 +76,7 @@ Route::middleware(['auth', \App\Http\Middleware\ForcePasswordChange::class])->gr
     Route::get('/releases/{release}/edit', [\App\Http\Controllers\ReleaseController::class, 'edit'])->name('releases.edit');
     Route::post('/releases/{release}/update', [\App\Http\Controllers\ReleaseController::class, 'update'])->name('releases.update');
     Route::post('/releases/{release}/takedown', [\App\Http\Controllers\ReleaseController::class, 'takedown'])->name('releases.takedown');
+    Route::post('/releases/{release}/stores/{store}/takedown', [\App\Http\Controllers\ReleaseController::class, 'takedownStore'])->name('releases.stores.takedown');
     Route::post('/releases/{release}/pay', [\App\Http\Controllers\ReleaseController::class, 'processPayment'])->name('releases.pay');
     
     // Search (FR31-FR33)

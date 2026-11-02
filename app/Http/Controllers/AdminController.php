@@ -211,9 +211,67 @@ class AdminController extends Controller
     public function reviewRelease(Request $request, Release $release)
     {
         $request->validate([
-            'action' => 'required|string|in:approve,reject,distribute,auto_qc',
+            'action' => 'required|string|in:approve,reject,distribute,auto_qc,process_store_takedown,process_full_takedown',
             'rejection_reason' => 'required_if:action,reject|nullable|string',
+            'store_id' => 'required_if:action,process_store_takedown|nullable|integer|exists:release_store,id',
         ]);
+
+        if ($request->action === 'process_store_takedown') {
+            $store = $release->stores()->whereKey($request->store_id)->firstOrFail();
+            if ($store->status !== 'pending_takedown') {
+                return back()->with('error', 'This platform has no pending removal request.');
+            }
+
+            $store->update(['status' => 'removed']);
+            if (!$release->stores()->whereIn('status', ['distributed', 'pending_takedown'])->exists()) {
+                $release->distribution_status = 'removed';
+                $release->save();
+            }
+
+            AuditLog::create([
+                'user_id' => $release->artist->user_id,
+                'action' => 'store_takedown_processed',
+                'description' => "The removal request for '{$release->title}' from {$store->store_name} was processed.",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'admin_store_takedown_processed',
+                'description' => "Processed removal of '{$release->title}' from {$store->store_name}.",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', "{$release->title} marked removed from {$store->store_name}.");
+        }
+
+        if ($request->action === 'process_full_takedown') {
+            if ($release->distribution_status !== 'pending_takedown') {
+                return back()->with('error', 'This release has no pending full takedown request.');
+            }
+
+            $release->stores()->where('status', 'pending_takedown')->update(['status' => 'removed']);
+            $release->distribution_status = 'removed';
+            $release->save();
+
+            AuditLog::create([
+                'user_id' => $release->artist->user_id,
+                'action' => 'release_takedown_processed',
+                'description' => "The full takedown request for '{$release->title}' was processed.",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+            AuditLog::create([
+                'user_id' => Auth::id(),
+                'action' => 'admin_release_takedown_processed',
+                'description' => "Processed full takedown of '{$release->title}'.",
+                'ip_address' => $request->ip(),
+                'user_agent' => $request->userAgent(),
+            ]);
+
+            return back()->with('success', "{$release->title} marked removed from all platforms.");
+        }
 
         if ($request->action === 'auto_qc') {
             $qc = ReleaseQualityControlService::inspectAndProcess($release, $request);
@@ -228,7 +286,7 @@ class AdminController extends Controller
             return back()->with('error', 'Only releases submitted for review can be approved or rejected.');
         }
 
-        if ($request->action === 'reject' && !in_array($release->distribution_status, ['pending', 'pending_takedown'], true)) {
+        if ($request->action === 'reject' && $release->distribution_status !== 'pending') {
             return back()->with('error', 'Only releases submitted for review can be rejected.');
         }
 

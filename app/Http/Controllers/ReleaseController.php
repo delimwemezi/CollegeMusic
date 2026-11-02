@@ -365,7 +365,7 @@ class ReleaseController extends Controller
         }
     }
 
-    public function takedown(Release $release)
+    public function takedown(Request $request, Release $release)
     {
         $user = Auth::user();
 
@@ -377,6 +377,7 @@ class ReleaseController extends Controller
             return back()->with('error', 'Only distributed releases can be taken down.');
         }
 
+        $release->stores()->where('status', 'distributed')->update(['status' => 'pending_takedown']);
         $release->distribution_status = 'pending_takedown';
         $release->save();
 
@@ -388,7 +389,36 @@ class ReleaseController extends Controller
             'user_agent' => $request->userAgent()
         ]);
 
-        return redirect()->route('catalogue')->with('success', 'Takedown request submitted. Administrators will process removal from digital stores.');
+        return redirect()->route('catalogue')->with('success', 'Takedown request submitted for all active platforms. Administrators will process the removals.');
+    }
+
+    public function takedownStore(Request $request, Release $release, ReleaseStore $store)
+    {
+        $user = Auth::user();
+
+        if ($release->artist->user_id !== $user->id) {
+            abort(403, 'Unauthorized.');
+        }
+
+        if ($store->release_id !== $release->id) {
+            abort(404);
+        }
+
+        if ($store->status !== 'distributed') {
+            return back()->with('error', 'Only active platforms can be requested for removal.');
+        }
+
+        $store->update(['status' => 'pending_takedown']);
+
+        AuditLog::create([
+            'user_id' => $user->id,
+            'action' => 'request_store_takedown',
+            'description' => "Requested removal of '{$release->title}' from {$store->store_name}.",
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        return back()->with('success', "Removal request submitted for {$store->store_name}. An administrator will process it.");
     }
 
     public function processPayment(Request $request, Release $release)
